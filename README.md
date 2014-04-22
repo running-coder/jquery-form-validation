@@ -1,4 +1,4 @@
-jquery-form-validation
+jQuery Form Validation
 ======================
 
 The jQuery form validation plugin unifies the way to validate HTML forms using JavaScript.

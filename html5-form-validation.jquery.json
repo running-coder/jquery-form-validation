@@ -1,17 +1,18 @@
 {
-    "name": "validation",
+    "name": "html5-form-validation",
     "title": "jQuery Form Validation",
     "description": "jQuery plugin that provides a client site form validation.",
     "keywords": [
         "form",
         "html5",
         "validate",
-        "validation"
+        "validation",
+        "input"
     ],
-    "version": "0.1.0",
+    "version": "0.1.1",
     "author": {
         "name": "Tom Bertrand",
-        "url": "www.runningcoder.org"
+        "url": "www.runningcoder.org/jqueryvalidation/"
     },
     "licenses": [
         {

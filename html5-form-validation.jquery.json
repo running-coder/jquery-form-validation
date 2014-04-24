@@ -9,10 +9,10 @@
         "validation",
         "input"
     ],
-    "version": "1.0.0",
+    "version": "1.0.1",
     "author": {
         "name": "Tom Bertrand",
-        "url": "www.runningcoder.org/jqueryvalidation/"
+        "url": "http://www.runningcoder.org/jqueryvalidation/"
     },
     "licenses": [
         {

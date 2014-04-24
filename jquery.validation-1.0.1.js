@@ -2,7 +2,7 @@
  * jQuery Form Validation
  *
  * @author Tom Bertrand
- * @version 1.0.0 (2014-05-22)
+ * @version 1.0.1 (2014-05-23)
  *
  * @copyright
  * Copyright (C) 2014 Tom Bertrand.
@@ -67,7 +67,7 @@
         'DATE': '$ is not a valid with format YYYY-MM-DD.',
         'EMAIL': '$ is not valid.',
         'URL': '$ is not valid.',
-        'PHONE': '$ is not a valid phone number',
+        'PHONE': '$ is not a valid phone number.',
         //'INARRAY': '$ is not a valid option.',
         '<': '$ must be less than % characters.',
         '<=': '$ must be less or equal to % characters.',
@@ -396,7 +396,7 @@
 
                     } catch (error) {
 
-                        if (validationMessage) {
+                        if (validationMessage || !options.submit.settings.allErrors) {
                             validateOnce = true;
                         }
 
@@ -520,13 +520,13 @@
                             return false;
                         }
 
-                        if (!eval('"' + encodeURIComponent(value) + '"' + operator + '"' + encodeURIComponent(comparedValue) + '"')) {
+                        if (!value || !eval('"' + encodeURIComponent(value) + '"' + operator + '"' + encodeURIComponent(comparedValue) + '"')) {
                             throw [_message[operator], compared];
                         }
 
                     } else {
 
-                        if (eval(value.length + operator + parseFloat(compared)) == false) {
+                        if (!value || eval(value.length + operator + parseFloat(compared)) == false) {
                             throw [_message[operator], compared];
                         }
 
@@ -545,14 +545,14 @@
                             return false;
                         }
 
-                        if (!eval('"' + encodeURIComponent(value) + '"' + operator + '"' + encodeURIComponent(comparedValue) + '"')) {
-                            throw [_message[operator], compared];
+                        if (!value || !eval('"' + encodeURIComponent(value) + '"' + operator + '"' + encodeURIComponent(comparedValue) + '"')) {
+                            throw [_message[operator].replace(' characters', ''), compared];
                         }
 
                     } else {
 
-                        if (!eval(value + operator + parseFloat(compared))) {
-                            throw [_message[operator], compared];
+                        if (!value || !eval(value + operator + parseFloat(compared))) {
+                            throw [_message[operator].replace(' characters', ''), compared];
                         }
 
                     }
@@ -734,10 +734,9 @@
                 (group ? label : input).parentsUntil(node, options.submit.settings.inputContainer).removeClass(options.submit.settings.errorClass)
             }
 
-            label.removeClass(options.submit.settings.errorClass);
+            label && label.removeClass(options.submit.settings.errorClass);
 
             input.removeClass(options.submit.settings.errorClass);
-
 
             if (options.submit.settings.display === 'inline') {
                 container.find('[' + _data.errorList + ']').remove();

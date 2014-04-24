@@ -227,6 +227,13 @@
                 }
             }
 
+            // @TODO Would there be a better fix to solve event conflict?
+            if (tpmOptions.dynamic.settings.trigger) {
+                if (tpmOptions.dynamic.settings.trigger === "keypress" && tpmOptions.submit.settings.clear === "keypress") {
+                    tpmOptions.dynamic.settings.trigger = "keydown";
+                }
+            }
+
             options = tpmOptions;
 
         }

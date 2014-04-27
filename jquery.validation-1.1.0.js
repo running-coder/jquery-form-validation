@@ -2,7 +2,7 @@
  * jQuery Form Validation
  *
  * @author Tom Bertrand
- * @version 1.0.1 (2014-05-23)
+ * @version 1.1.0 (2014-05-26)
  *
  * @copyright
  * Copyright (C) 2014 Tom Bertrand.
@@ -17,6 +17,13 @@
 {
 
     window.Validation = {};
+
+    /**
+     * Fail-safe preventExtensions function for older browsers
+     */
+    if (typeof Object.preventExtensions !== "function") {
+        Object.preventExtensions = function (obj) { return obj; }
+    }
 
     // Not using strict to avoid throwing a window error on bad config extend.
     // console.debug is used instead to debug Validation
@@ -49,14 +56,16 @@
         // Validate value if it is not empty
         OPTIONAL: /^.*$/,
         // Validate values or length by comparison
-        COMPARISON: /^\s*([LV])\s*([<>]=?|==|!=)\s*([^<>=!]+?)\s*$/
+        COMPARISON: /^\s*([LV])\s*([<>]=?|==|!=)\s*([^<>=!]+?)\s*$/,
+        // Validate credit card number
+        LUHN: "_validateLuhn"
     };
 
     /**
      * @private
      * Error messages
      */
-    var _message = {
+    var _messages = Object.preventExtensions({
         'default': '$ contain error(s).',
         'NOTEMPTY': '$ must not be empty.',
         'NUMERIC': '$ must be numeric.',
@@ -75,7 +84,8 @@
         '>=': '$ must be greater or equal to % characters.',
         '==': '$ must be equal to %',
         '!=': '$ must be different than %'
-    };
+    }),
+        _extendedMessages = false;
 
     /**
      * @private
@@ -108,7 +118,8 @@
                  errorClass: "error",
                  errorListClass: "error-list",
                  inputContainer: null,
-                 clear: "focusin"
+                 clear: "focusin",
+                 scrollToError: false
              },
              callback: {
                  onInit: null,
@@ -129,7 +140,8 @@
                  onError: null,
                  onComplete: null
              }
-         }
+         },
+         messages: {}
      };
 
     /**
@@ -148,7 +160,8 @@
                     "hover", "mousedown", "mouseenter", 
                     "mouseleave", "mousemove", "mouseout",
                     "mouseover", "mouseup", "toggle"
-                ]
+                ],
+                scrollToError: [true, false]
             }
         },
         dynamic: {
@@ -157,13 +170,6 @@
             }
         }
     };
-
-    /**
-     * Fail-safe preventExtensions function for older browsers
-     */
-    if (typeof Object.preventExtensions !== "function") {
-        Object.preventExtensions = function (obj) { return obj; }
-    }
 
     // =================================================================================================================
 
@@ -176,7 +182,25 @@
      */
     var Validation = function (node, options) {
 
-        var errors = [];
+        var errors = [],
+            hasScrolled = false;
+
+        /**
+         * Extends user-defined "message" into the default Validation "_message".
+         * Notes:
+         *  - preventExtensions prevents from modifying the Validation "_message" object structure
+         */
+        function extendMessages () {
+
+            if (!window.Validation.messages || _extendedMessages) {
+                return false;
+            }
+
+            _messages = $.extend(_messages, window.Validation.messages);
+
+            _extendedMessages = true;
+
+        }
 
         /**
          * Extends user-defined "options" into the default Validation "_options".
@@ -190,7 +214,10 @@
                 options = {};
             }
 
-            var tpmOptions = Object.preventExtensions($.extend(true, {}, _options));
+            var tpmOptions = Object.preventExtensions($.extend(true, {}, _options)),
+                tmpMessages = Object.preventExtensions($.extend(true, {}, _messages));
+
+            tpmOptions.messages = $.extend(tmpMessages, options.messages || {});
 
             for (var method in options) {
                 if (!options.hasOwnProperty(method) || !(options[method] instanceof Object)) {
@@ -250,10 +277,14 @@
             }
 
             $.each(
-                $(node).find('[' + _data.validation + ']:not([disabled]),[' + _data.regex + ']:not([disabled])'),
+                $(node).find('[' + _data.validation + '],[' + _data.regex + ']'),
                 function (index, input) {
 
                     $(input).unbind(options.dynamic.settings.trigger).on(options.dynamic.settings.trigger, function (e) {
+
+                        if ($(this).is(':disabled')) {
+                            return false;
+                        }
 
                         //e.preventDefault();
 
@@ -338,8 +369,12 @@
         function validateForm () {
 
             $.each(
-                $(node).find('[' + _data.validation + ']:not([disabled]),[' + _data.regex + ']:not([disabled])'),
+                $(node).find('[' + _data.validation + '],[' + _data.regex + ']'),
                 function (index, input) {
+
+                    if ($(this).is(':disabled')) {
+                        return false;
+                    }
 
                     validateInput(input);
 
@@ -489,15 +524,27 @@
             // Validate for custom "data-validation-regex"
             if (rule instanceof RegExp) {
                 if (rule.test(value)) {
-                    throw [_message['default'], ''];
+                    throw [options.messages['default'], ''];
                 }
                 return;
             }
 
             // Validate for predefined "data-validation" _rules
             if (_rules[rule]) {
+                /*
+                if (typeof _rules[rule] === "string") {
+
+                    try {
+                        var isLuhn = eval(_rules[rule] + '(' + value.toString() + ')');
+                    } catch (error) {
+                    }
+
+                    return;
+                }
+*/
+
                 if (!_rules[rule].test(value)) {
-                    throw [_message[rule], ''];
+                    throw [options.messages[rule], ''];
                 }
                 return;
             }
@@ -528,13 +575,13 @@
                         }
 
                         if (!value || !eval('"' + encodeURIComponent(value) + '"' + operator + '"' + encodeURIComponent(comparedValue) + '"')) {
-                            throw [_message[operator], compared];
+                            throw [options.messages[operator], compared];
                         }
 
                     } else {
 
                         if (!value || eval(value.length + operator + parseFloat(compared)) == false) {
-                            throw [_message[operator], compared];
+                            throw [options.messages[operator], compared];
                         }
 
                     }
@@ -553,13 +600,13 @@
                         }
 
                         if (!value || !eval('"' + encodeURIComponent(value) + '"' + operator + '"' + encodeURIComponent(comparedValue) + '"')) {
-                            throw [_message[operator].replace(' characters', ''), compared];
+                            throw [options.messages[operator].replace(' characters', ''), compared];
                         }
 
                     } else {
 
                         if (!value || !eval(value + operator + parseFloat(compared))) {
-                            throw [_message[operator].replace(' characters', ''), compared];
+                            throw [options.messages[operator].replace(' characters', ''), compared];
                         }
 
                     }
@@ -700,6 +747,23 @@
                     }(inputName, input, label, errorContainer, group))
             }
 
+            if (options.submit.settings.scrollToError && !hasScrolled) {
+
+                hasScrolled = true;
+
+                if (typeof $.scrollTo !== 'function') {
+                    window.debug('Missing jQuery.scrollTo, scrolling will not happen.');
+                    return false;
+                }
+
+                $.scrollTo(
+                    (options.submit.settings.display === 'block') ?
+                        errorContainer :
+                        input
+                    , 500, { offset: -100 });
+
+            }
+
         }
 
         /**
@@ -709,12 +773,6 @@
 
             for (var inputName in errors) {
                 displayOneError(inputName);
-            }
-
-            if (options.submit.settings.display === 'block') {
-                if (typeof $.scrollTo === 'function') {
-                    $.scrollTo(node, 500, { offset: -100 });
-                }
             }
 
         }
@@ -732,6 +790,7 @@
 
             try {
                 delete errors[inputName];
+                hasScrolled = false;
             } catch(error) {
                 window.debug('Validation.resetOneError unable to find and delete ' + inputName + ' inside {object} errors.');
                 return false;
@@ -756,7 +815,8 @@
          */
         function resetErrors () {
 
-            errors = [];
+            errors = [],
+            hasScrolled = false;;
 
             $(node).find('[' + _data.errorList + ']').remove();
             $(node).find('.' + options.submit.settings.errorClass).removeClass(options.submit.settings.errorClass);
@@ -873,12 +933,31 @@
 
         };
 
+        var _validateLuhn = function (luhn) {
+
+            var len = luhn.length,
+                mul = 0,
+                prodArr = [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9], [0, 2, 4, 6, 8, 1, 3, 5, 7, 9]],
+                sum = 0;
+
+            while (len--) {
+                sum += prodArr[mul][parseInt(luhn.charAt(len), 10)];
+                mul ^= 1;
+            }
+
+            return sum % 10 === 0 && sum > 0;
+
+        };
+
+
+
         /**
          * @private
          * Constructs Validation
          */
         this.__construct = function () {
 
+            extendMessages();
             extendOptions();
 
             delegateDynamicValidation();

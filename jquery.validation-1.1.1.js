@@ -2,7 +2,7 @@
  * jQuery Form Validation
  *
  * @author Tom Bertrand
- * @version 1.1.0 (2014-05-26)
+ * @version 1.1.1 (2014-05-28)
  *
  * @copyright
  * Copyright (C) 2014 Tom Bertrand.
@@ -160,8 +160,7 @@
                     "hover", "mousedown", "mouseenter", 
                     "mouseleave", "mousemove", "mouseout",
                     "mouseover", "mouseup", "toggle"
-                ],
-                scrollToError: [true, false]
+                ]
             }
         },
         dynamic: {
@@ -751,16 +750,13 @@
 
                 hasScrolled = true;
 
-                if (typeof $.scrollTo !== 'function') {
-                    window.debug('Missing jQuery.scrollTo, scrolling will not happen.');
-                    return false;
-                }
+                var offset = parseFloat(options.submit.settings.scrollToError.offset) || 0,
+                    duration = parseFloat(options.submit.settings.scrollToError.duration) || 500,
+                    handle = (options.submit.settings.display === 'block') ? errorContainer : input;
 
-                $.scrollTo(
-                    (options.submit.settings.display === 'block') ?
-                        errorContainer :
-                        input
-                    , 500, { offset: -100 });
+                $('html, body').animate({
+                    scrollTop: handle.offset().top + offset
+                }, duration);
 
             }
 

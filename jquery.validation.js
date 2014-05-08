@@ -2,7 +2,7 @@
  * jQuery Form Validation
  *
  * @author Tom Bertrand
- * @version 1.1.1 (2014-05-28)
+ * @version 1.2.0 (2014-05-08)
  *
  * @copyright
  * Copyright (C) 2014 Tom Bertrand.
@@ -16,7 +16,11 @@
 (function (window, document, $, undefined)
 {
 
-    window.Validation = {};
+    window.Validation = {
+        form: [],
+        messages: null,
+        hasScrolled: false
+    };
 
     /**
      * Fail-safe preventExtensions function for older browsers
@@ -157,7 +161,7 @@
                 clear: ["focusin", "keypress", false],
                 trigger: [
                     "click", "dblclick", "focusout",
-                    "hover", "mousedown", "mouseenter", 
+                    "hover", "mousedown", "mouseenter",
                     "mouseleave", "mousemove", "mouseout",
                     "mouseover", "mouseup", "toggle"
                 ]
@@ -181,8 +185,8 @@
      */
     var Validation = function (node, options) {
 
-        var errors = [],
-            hasScrolled = false;
+        var errors = [];
+            window.Validation.hasScrolled = false;
 
         /**
          * Extends user-defined "message" into the default Validation "_message".
@@ -275,11 +279,17 @@
                 return false;
             }
 
+            var namespace = ".vd", // validation.delegate
+                event = options.dynamic.settings.trigger + namespace;
+            if (options.dynamic.settings.trigger !== "focusout") {
+                event += " change" + namespace + " paste" + namespace;
+            }
+
             $.each(
                 $(node).find('[' + _data.validation + '],[' + _data.regex + ']'),
                 function (index, input) {
 
-                    $(input).unbind(options.dynamic.settings.trigger).on(options.dynamic.settings.trigger, function (e) {
+                    $(input).unbind(event).on(event, function (e) {
 
                         if ($(this).is(':disabled')) {
                             return false;
@@ -287,22 +297,23 @@
 
                         //e.preventDefault();
 
-                        var input = this;
+                        var input = this,
+                            keyCode = e.keyCode || null;
 
                         _typeWatch(function () {
 
                             if (!validateInput(input)) {
 
                                 displayOneError(input.name);
-                                _executeCallback(options.dynamic.callback.onError, [node, input, errors[input.name]]);
+                                _executeCallback(options.dynamic.callback.onError, [node, input, keyCode, errors[input.name]]);
 
                             } else {
 
-                                _executeCallback(options.dynamic.callback.onSuccess, [node, input]);
+                                _executeCallback(options.dynamic.callback.onSuccess, [node, input, keyCode]);
 
                             }
 
-                            _executeCallback(options.dynamic.callback.onComplete, [node, input]);
+                            _executeCallback(options.dynamic.callback.onComplete, [node, input, keyCode]);
 
                         }, options.dynamic.settings.delay);
 
@@ -327,8 +338,10 @@
 
             _executeCallback(options.submit.callback.onInit, [node]);
 
+            var event = options.submit.settings.trigger + '.vd';
+
             $(node).on("submit", false );
-            $(node).find(options.submit.settings.button).unbind(options.submit.settings.trigger).on(options.submit.settings.trigger, function (e) {
+            $(node).find(options.submit.settings.button).unbind(event).on(event, function (e) {
 
                 e.preventDefault();
 
@@ -530,18 +543,6 @@
 
             // Validate for predefined "data-validation" _rules
             if (_rules[rule]) {
-                /*
-                if (typeof _rules[rule] === "string") {
-
-                    try {
-                        var isLuhn = eval(_rules[rule] + '(' + value.toString() + ')');
-                    } catch (error) {
-                    }
-
-                    return;
-                }
-*/
-
                 if (!_rules[rule].test(value)) {
                     throw [options.messages[rule], ''];
                 }
@@ -627,7 +628,19 @@
                 errors[inputName] = [];
             }
 
-            errors[inputName].push(error.capitalize());
+            error = error.capitalize();
+
+            var hasError = false;
+            for (var i = 0; i < errors[inputName].length; i++) {
+                if (errors[inputName][i] === error) {
+                    hasError = true;
+                    break;
+                }
+            }
+
+            if (!hasError) {
+                errors[inputName].push(error);
+            }
 
         }
 
@@ -727,28 +740,39 @@
                     input = groupInput;
                 }
 
-                input.unbind(options.submit.settings.clear)
-                    .on(options.submit.settings.clear + " " + options.dynamic.settings.trigger, function (a,b,c,d,e) {
+                var namespace = ".vr", //validation.resetError
+                    event = "coucou"+namespace;
+                if (options.submit.settings.clear) {
+                    event += " " + options.submit.settings.clear + namespace
+                }
+                if (options.dynamic.settings.trigger) {
+                    event += " " + options.dynamic.settings.trigger + namespace;
+                    if (options.dynamic.settings.trigger !== "focusout") {
+                        event += " change" + namespace + " paste" + namespace;
+                    }
+                }
 
-                        return function () {
+                input.unbind(event).on(event, function (a,b,c,d,e) {
 
-                            if (e) {
+                    return function () {
 
-                                if ($(c).hasClass(options.submit.settings.errorClass)) {
-                                    resetOneError(a,b,c,d,e);
-                                }
+                        if (e) {
 
-                            } else if ($(b).hasClass(options.submit.settings.errorClass)) {
-                                resetOneError(a,b,c,d);
+                            if ($(c).hasClass(options.submit.settings.errorClass)) {
+                                resetOneError(a,b,c,d,e);
                             }
-                        };
 
-                    }(inputName, input, label, errorContainer, group))
+                        } else if ($(b).hasClass(options.submit.settings.errorClass)) {
+                            resetOneError(a,b,c,d);
+                        }
+                    };
+
+                }(inputName, input, label, errorContainer, group))
             }
 
-            if (options.submit.settings.scrollToError && !hasScrolled) {
+            if (options.submit.settings.scrollToError && !window.Validation.hasScrolled) {
 
-                hasScrolled = true;
+                window.Validation.hasScrolled = true;
 
                 var offset = parseFloat(options.submit.settings.scrollToError.offset) || 0,
                     duration = parseFloat(options.submit.settings.scrollToError.duration) || 500,
@@ -784,24 +808,39 @@
          */
         function resetOneError(inputName, input, label, container, group) {
 
-            try {
-                delete errors[inputName];
-                hasScrolled = false;
-            } catch(error) {
-                window.debug('Validation.resetOneError unable to find and delete ' + inputName + ' inside {object} errors.');
-                return false;
-            }
+            delete errors[inputName];
 
-            if (options.submit.settings.inputContainer) {
-                (group ? label : input).parentsUntil(node, options.submit.settings.inputContainer).removeClass(options.submit.settings.errorClass)
-            }
+            if (container) {
 
-            label && label.removeClass(options.submit.settings.errorClass);
+                //window.Validation.hasScrolled = false;
 
-            input.removeClass(options.submit.settings.errorClass);
+                if (options.submit.settings.inputContainer) {
+                    (group ? label : input).parentsUntil(node, options.submit.settings.inputContainer).removeClass(options.submit.settings.errorClass)
+                }
 
-            if (options.submit.settings.display === 'inline') {
-                container.find('[' + _data.errorList + ']').remove();
+                label && label.removeClass(options.submit.settings.errorClass);
+
+                input.removeClass(options.submit.settings.errorClass);
+
+                if (options.submit.settings.display === 'inline') {
+                    container.find('[' + _data.errorList + ']').remove();
+                }
+
+            } else {
+
+                if (!input) {
+                    input = $(node).find('[name="' + inputName + '"]');
+
+                    if (!input[0]) {
+                        window.debug('Validation.resetOneError Unable to find inputName: ' + inputName + '.');
+                        return false;
+                    }
+                }
+
+                //$._data( input[0], "events" );
+
+                input.trigger('coucou.vr');
+
             }
 
         }
@@ -811,8 +850,8 @@
          */
         function resetErrors () {
 
-            errors = [],
-            hasScrolled = false;;
+            errors = [];
+            window.Validation.hasScrolled = false;
 
             $(node).find('[' + _data.errorList + ']').remove();
             $(node).find('.' + options.submit.settings.errorClass).removeClass(options.submit.settings.errorClass);
@@ -984,7 +1023,19 @@
              * @public
              * Display all errors
              */
-            displayErrors: displayErrors
+            displayErrors: displayErrors,
+
+            /**
+             * @public
+             * Remove one error
+             */
+            resetOneError: resetOneError,
+
+            /**
+             * @public
+             * Remove all errors
+             */
+            resetErrors: resetErrors
 
         };
 
@@ -1049,6 +1100,24 @@
     $.fn.addError = function (error) {
 
         return _api.addError(this, error);
+
+    };
+
+    /**
+     * @public
+     * jQuery public function to remove one or multiple errors.
+     *
+     * @param {array} error Array of errors where the keys are the input names
+     * @example
+     * $('form#myForm').removeError([
+     *     'username'
+     * ]);
+     *
+     * @return {object} Modified DOM element
+     */
+    $.fn.removeError = function (error) {
+
+        return _api.removeError(this, error);
 
     };
 
@@ -1160,7 +1229,7 @@
 
             return node.each(function () {
 
-                window.Validation[node.selector] = new Validation(this, options);
+                window.Validation.form[node.selector] = new Validation(this, options);
 
             });
 
@@ -1265,7 +1334,13 @@
          * Note: The same form jQuery selector MUST be used to recuperate the Validation configuration.
          *
          * @example
-         * $('#form-signup_v3').addError(errorMessage)
+         * $('#form-signup_v3').addError({
+         *     'inputName': 'my error message',
+         *     'inputName2': [
+         *         'first error message',
+         *         'second error message'
+         *     ]
+         * })
          *
          * @param {object} node jQuery object
          * @param {object} error Object of errors to add on the node
@@ -1274,36 +1349,104 @@
          */
         addError: function (node, error) {
 
-            if (!window.Validation[node.selector]) {
+            if (!window.Validation.form[node.selector]) {
                 window.debug('$.addError - Invalid node selector - Make sure you are using the same one you initialize the Validation with.');
                 return false;
             }
 
-            if (typeof error !== "object" || $.isEmptyObject(error)) {
+            if (typeof error !== "object" || $.isEmptyObject(error) || Object.prototype.toString.call(error) !== "[object Object]") {
                 window.debug('$.addError - Invalid error object.');
                 return false;
             }
 
+            var input,
+                onlyOnce = true;
             for (var inputName in error) {
 
                 if (!error.hasOwnProperty(inputName)) {
                     continue;
                 }
 
-                if (typeof error[inputName] === "string") {
-                    window.Validation[node.selector].registerError(inputName, error[inputName])
-                } else if (error[inputName] instanceof Array) {
+                if (!(error[inputName] instanceof Array)) {
+                    error[inputName] = [error[inputName]];
+                }
 
-                    for (var i = 0; i < error[inputName].length; i++) {
-                        window.Validation[node.selector].registerError(inputName, error[inputName][i])
-                    }
-
-                } else {
-                    window.debug('$.addError - Invalid error object property - Accepted format: {"inputName": "errorString"} or {"inputName": ["errorString", "errorString"]}.');
+                input = $(node.selector).find('[name="'+ inputName + '"]');
+                if (!input[0]) {
+                    window.debug('$.addError - Unable to find [name="' + inputName + '"] inside form: ' + node.selector + '.');
                     continue;
                 }
 
-                window.Validation[node.selector].displayOneError(inputName);
+                if (onlyOnce) {
+                    window.Validation.hasScrolled = false;
+                    onlyOnce = false;
+                }
+
+                window.Validation.form[node.selector].resetOneError(inputName, input);
+
+                for (var i = 0; i < error[inputName].length; i++) {
+
+                    if (typeof error[inputName][i] !== "string") {
+                        window.debug('$.addError - Invalid error object property - Accepted format: {"inputName": "errorString"} or {"inputName": ["errorString", "errorString"]}.');
+                        continue;
+                    }
+
+                    window.Validation.form[node.selector].registerError(inputName, error[inputName][i]);
+
+                }
+
+                window.Validation.form[node.selector].displayOneError(inputName);
+
+            }
+
+        },
+
+        /**
+         * API method to manually remove a form error.
+         * Note: The same form jQuery selector MUST be used to recuperate the Validation configuration.
+         *
+         * @example
+         * $('#form-signup_v3').removeError([
+         *     'signin_v2[username]',
+         *     'signin_v2[password]'
+         * ])
+         *
+         * @param {object} node jQuery object
+         * @param {object} inputName Object of errors to remove on the node
+         *
+         * @returns {*}
+         */
+        removeError: function (node, inputName) {
+
+            if (!window.Validation.form[node.selector]) {
+                window.debug('$.removeError - Invalid node selector - Make sure you are using the same one you initialize the Validation with.');
+                return false;
+            }
+
+            if (!inputName) {
+                window.Validation.form[node.selector].resetErrors();
+                return false;
+            }
+
+            if (typeof inputName === "object" && ($.isEmptyObject(inputName) || Object.prototype.toString.call(inputName) !== "[object Array]")) {
+                window.debug('$.removeError - Invalid inputName array.');
+                return false;
+            }
+
+            if (!(inputName instanceof Array)) {
+                inputName = [inputName];
+            }
+
+            var input;
+            for (var i = 0; i < inputName.length; i++) {
+
+                input = $(node.selector).find('[name="'+ inputName[i] + '"]');
+                if (!input[0]) {
+                    window.debug('$.removeError - Unable to find [name="' + inputName[i] + '"] inside form: ' + node.selector + '.');
+                    continue;
+                }
+
+                window.Validation.form[node.selector].resetOneError(inputName[i], input);
 
             }
 

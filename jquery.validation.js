@@ -2,7 +2,7 @@
  * jQuery Form Validation
  *
  * @author Tom Bertrand
- * @version 1.2.0 (2014-05-08)
+ * @version 1.3.0 (2014-07-24)
  *
  * @copyright
  * Copyright (C) 2014 Tom Bertrand.
@@ -60,9 +60,10 @@
         // Validate value if it is not empty
         OPTIONAL: /^.*$/,
         // Validate values or length by comparison
-        COMPARISON: /^\s*([LV])\s*([<>]=?|==|!=)\s*([^<>=!]+?)\s*$/,
+        COMPARISON: /^\s*([LV])\s*([<>]=?|==|!=)\s*([^<>=!]+?)\s*$/
         // Validate credit card number
-        LUHN: "_validateLuhn"
+        //@TODO: Implement this ..
+        //ZIP: /^(?!([a-y]{1}\d{1}[a-z]{1}[-\s]?\d{1}[a-z]{1}\d{1})$).*$/i.test('g1q b1g')
     };
 
     /**
@@ -145,7 +146,8 @@
                  onComplete: null
              }
          },
-         messages: {}
+         messages: {},
+         debug: false
      };
 
     /**
@@ -171,7 +173,8 @@
             settings: {
                 trigger: ["focusout", "keydown", "keypress", "keyup"]
             }
-        }
+        },
+        debug: [true, false]
     };
 
     // =================================================================================================================
@@ -203,6 +206,13 @@
 
             _extendedMessages = true;
 
+            options.debug && window.Debug.log({
+                'node': node,
+                'function': 'extendMessage()',
+                'arguments': JSON.stringify(window.Validation.messages),
+                'message': 'OK - Overriding ' + node + ' default message(s)'
+            });
+
         }
 
         /**
@@ -223,12 +233,37 @@
             tpmOptions.messages = $.extend(tmpMessages, options.messages || {});
 
             for (var method in options) {
-                if (!options.hasOwnProperty(method) || !(options[method] instanceof Object)) {
+
+                if (!options.hasOwnProperty(method) || method === "debug") {
+                    continue;
+                }
+
+                if (options.debug && (!_options[method] || !(options[method] instanceof Object))) {
+
+                    window.Debug.log({
+                        'node': node,
+                        'function': 'extendOptions()',
+                        'arguments': '{' + method + ': ' + JSON.stringify(options[method]) + '}',
+                        'message': 'WARNING - ' + method + ' - invalid option'
+                    });
+
                     continue;
                 }
 
                 for (var type in options[method]) {
-                    if (!options[method].hasOwnProperty(type) || !(options[method][type] instanceof Object)) {
+                    if (!options[method].hasOwnProperty(type)) {
+                        continue;
+                    }
+
+                    if (!_options[method][type] || !(options[method][type] instanceof Object)) {
+
+                        options.debug && window.Debug.log({
+                            'node': node,
+                            'function': 'extendOptions()',
+                            'arguments': '{' + type + ': ' + JSON.stringify(options[method][type]) + '}',
+                            'message': 'WARNING - ' + type + ' - invalid option'
+                        });
+
                         continue;
                     }
 
@@ -242,10 +277,12 @@
                             _supported[method][type][option] &&
                             $.inArray(options[method][type][option], _supported[method][type][option]) === -1) {
 
-                            window.debug(
-                                'Validation.extendOptions - Delete unsupported property - ' + type +
-                                ': {' + option.toString() + ': ' + options[method][type][option].toString() + '}'
-                            );
+                            options.debug && window.Debug.log({
+                                'node': node,
+                                'function': 'extendOptions()',
+                                'arguments': '{' + option + ': ' + JSON.stringify(options[method][type][option]) + '}',
+                                'message': 'WARNING - ' + option.toString() + ': ' + JSON.stringify(options[method][type][option]) + ' - unsupported option'
+                            });
 
                             delete options[method][type][option];
                         }
@@ -255,6 +292,10 @@
                         tpmOptions[method][type] = $.extend(Object.preventExtensions(tpmOptions[method][type]), options[method][type]);
                     }
                 }
+            }
+
+            if (options.debug && $.inArray(options.debug, _supported['debug'] !== -1)) {
+                tpmOptions.debug = options.debug;
             }
 
             // @TODO Would there be a better fix to solve event conflict?
@@ -276,6 +317,23 @@
         function delegateDynamicValidation() {
 
             if (!options.dynamic.settings.trigger) {
+                return false;
+            }
+
+            options.debug && window.Debug.log({
+                'node': node,
+                'function': 'delegateDynamicValidation()',
+                'arguments': JSON.stringify(options),
+                'message': 'OK - Dynamic Validation activated on ' + $(node).length + ' form(s)'
+            });
+
+            if (options.debug && !$(node).find('[' + _data.validation + '],[' + _data.regex + ']')[0]) {
+                window.Debug.log({
+                    'node': node,
+                    'function': 'delegateDynamicValidation()',
+                    'arguments': '$(node).find([' + _data.validation + '],[' + _data.regex + '])',
+                    'message': 'ERROR - [' + _data.validation + '] not found'
+                });
                 return false;
             }
 
@@ -340,6 +398,23 @@
 
             var event = options.submit.settings.trigger + '.vd';
 
+            options.debug && window.Debug.log({
+                'node': node,
+                'function': 'delegateValidation()',
+                'arguments': JSON.stringify(options),
+                'message': 'OK - Validation activated on ' + $(node).length + ' form(s)'
+            });
+
+            if (options.debug && !$(node).find(options.submit.settings.button)[0]) {
+                 window.Debug.log({
+                    'node': node,
+                    'function': 'delegateDynamicValidation()',
+                    'arguments': '$(node).find(' + options.submit.settings.button + ')',
+                    'message': 'ERROR - ' + options.submit.settings.button + ' not found'
+                });
+                return false;
+            }
+
             $(node).on("submit", false );
             $(node).find(options.submit.settings.button).unbind(event).on(event, function (e) {
 
@@ -365,6 +440,8 @@
                     _executeCallback(options.submit.callback.onAfterSubmit, [node]);
 
                 }
+
+                options.debug && window.Debug.print();
 
                 return false;
 
@@ -410,7 +487,14 @@
             var inputName = $(input).attr('name');
 
             if (!inputName) {
-                window.debug('Validation.validateInput - Invalid {string} inputName on ' + input.toString());
+
+                options.debug && window.Debug.log({
+                    'node': node,
+                    'function': 'validateInput()',
+                    'arguments': '$(input).attr("name")',
+                    'message': 'ERROR - Missing input [name]'
+                });
+
                 return false;
             }
 
@@ -499,7 +583,13 @@
 
                 } catch (error) {
 
-                    window.debug('Invalid data-validation-regex on ' + inputName);
+                    options.debug && window.Debug.log({
+                        'node': node,
+                        'function': 'validateInput()',
+                        'arguments': '{pattern: {' + pattern + '}, modifier: {' + patternModifier+ '}',
+                        'message': 'WARNING - Invalid [data-validation-regex] on input ' + inputName
+                    });
+
                     return true;
 
                 }
@@ -551,8 +641,16 @@
 
             // Validate for comparison "data-validation"
             var comparison = rule.match(_rules['COMPARISON']);
+
             if (!comparison || comparison.length !== 4) {
-                window.debug('Validation.validateRule - Invalid validation rule: ' + rule);
+
+                options.debug && window.Debug.log({
+                    'node': node,
+                    'function': 'validateRule()',
+                    'arguments': 'value: ' + value + ' rule: ' + rule,
+                    'message': 'WARNING - Invalid comparison'
+                });
+
                 return;
             }
 
@@ -566,17 +664,17 @@
                 // Compare input "Length"
                 case "L":
 
+                    // Only numeric value for "L" are allowed
                     if (isNaN(compared)) {
 
-                        comparedValue = $(node).find('[name="' + compared + '"]').val();
-                        if (!comparedValue) {
-                            window.debug('$.Validation.validateRule - Unable to find value of input[name="' + compared + '"] inside rule ' + rule)
-                            return false;
-                        }
+                        options.debug && window.Debug.log({
+                            'node': node,
+                            'function': 'validateRule()',
+                            'arguments': 'compare: ' + compared + ' rule: ' + rule,
+                            'message': 'WARNING - Invalid rule, "L" compare must be numeric'
+                        });
 
-                        if (!value || !eval('"' + encodeURIComponent(value) + '"' + operator + '"' + encodeURIComponent(comparedValue) + '"')) {
-                            throw [options.messages[operator], compared];
-                        }
+                        return false;
 
                     } else {
 
@@ -585,17 +683,26 @@
                         }
 
                     }
+
                     break;
 
                 // Compare input "Value"
                 case "V":
                 default:
 
+                    // Compare Field values
                     if (isNaN(compared)) {
 
                         comparedValue = $(node).find('[name="' + compared + '"]').val();
                         if (!comparedValue) {
-                            window.debug('$.Validation.validateRule - Unable to find value of input[name="' + compared + '"] inside rule ' + rule)
+
+                            options.debug && window.Debug.log({
+                                'node': node,
+                                'function': 'validateRule()',
+                                'arguments': 'compare: ' + compared + ' rule: ' + rule,
+                                'message': 'WARNING - Unable to find compared field [name="' + compared + '"]'
+                            });
+
                             return false;
                         }
 
@@ -603,9 +710,10 @@
                             throw [options.messages[operator].replace(' characters', ''), compared];
                         }
 
+                    // Compare numeric value
                     } else {
 
-                        if (!value || !eval(value + operator + parseFloat(compared))) {
+                        if (!value || isNaN(value) || !eval(value + operator + parseFloat(compared))) {
                             throw [options.messages[operator].replace(' characters', ''), compared];
                         }
 
@@ -672,7 +780,14 @@
             label = null;
 
             if (!input[0]) {
-                window.debug('Validation.displayOneError unable to find ' + inputName);
+
+                options.debug && window.Debug.log({
+                    'node': node,
+                    'function': 'displayOneError()',
+                    'arguments': '[name="' + inputName + '"]',
+                    'message': 'ERROR - Unable to find input by name "' + inputName + '"'
+                });
+
                 return false;
             }
 
@@ -741,7 +856,7 @@
                 }
 
                 var namespace = ".vr", //validation.resetError
-                    event = "coucou"+namespace;
+                    event = "coucou" + namespace;
                 if (options.submit.settings.clear) {
                     event += " " + options.submit.settings.clear + namespace
                 }
@@ -832,13 +947,19 @@
                     input = $(node).find('[name="' + inputName + '"]');
 
                     if (!input[0]) {
-                        window.debug('Validation.resetOneError Unable to find inputName: ' + inputName + '.');
+
+                        options.debug && window.Debug.log({
+                            'node': node,
+                            'function': 'resetOneError()',
+                            'arguments': '[name="' + inputName + '"]',
+                            'message': 'ERROR - Unable to find input by name "' + inputName + '"'
+                        });
+
                         return false;
                     }
                 }
 
                 //$._data( input[0], "events" );
-
                 input.trigger('coucou.vr');
 
             }
@@ -957,7 +1078,14 @@
                 }
 
                 if (!_isValid || typeof _callback !== "function") {
-                    window.debug('Validation._executeFunction - Invalid function - ' + callback[0].toString());
+
+                    options.debug && window.Debug.log({
+                        'node': node,
+                        'function': '_executeCallback()',
+                        'arguments': JSON.stringify(callback),
+                        'message': 'WARNING - Invalid callback function"'
+                    });
+
                     return false;
                 }
 
@@ -967,24 +1095,6 @@
             return true;
 
         };
-
-        var _validateLuhn = function (luhn) {
-
-            var len = luhn.length,
-                mul = 0,
-                prodArr = [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9], [0, 2, 4, 6, 8, 1, 3, 5, 7, 9]],
-                sum = 0;
-
-            while (len--) {
-                sum += prodArr[mul][parseInt(luhn.charAt(len), 10)];
-                mul ^= 1;
-            }
-
-            return sum % 10 === 0 && sum > 0;
-
-        };
-
-
 
         /**
          * @private
@@ -997,6 +1107,8 @@
 
             delegateDynamicValidation();
             delegateValidation();
+
+            options.debug && window.Debug.print();
 
         }();
 
@@ -1465,8 +1577,93 @@
         }
     };
 
+    window.Debug = {
+
+        table: [],
+        log: function (debugObject) {
+
+            if (!debugObject.message || typeof debugObject.message !== "string") {
+                return false;
+            }
+
+            this.table[debugObject.message] = $.extend(
+                Object.preventExtensions(
+                    {
+                        'node': '',
+                        'function': '',
+                        'arguments': ''
+                    }
+                ), debugObject
+            )
+
+        },
+        print: function () {
+
+            if ($.isEmptyObject(this.table)) {
+                return false;
+            }
+
+            if (console.group !== undefined || console.table !== undefined) {
+
+                console.groupCollapsed('--- jQuery Form Validation Debug ---');
+
+                if (console.table) {
+                    console.table(this.table);
+                } else {
+                    $.each(this.table, function (index, data) {
+                        console.log(data['Name'] + ': ' + data['Execution Time']+'ms');
+                    });
+                }
+
+                console.groupEnd();
+
+            } else {
+                console.log('Debug is not available on your current browser, try the most recent version of Chrome or Firefox.');
+            }
+
+            this.table = [];
+
+        }
+
+    };
+
     String.prototype.capitalize = function() {
         return this.charAt(0).toUpperCase() + this.slice(1);
     }
+
+    /**
+     * Creates a String from a JSON object
+     *
+     * @return {string|array} str String or array of strings
+     */
+    window.JSON.stringify = JSON.stringify || function (obj) {
+        var t = typeof (obj);
+        if (t !== "object" || obj === null) {
+            // simple data type
+            if (t === "string") {
+                obj = '"' + obj + '"';
+            }
+            return String(obj);
+        }
+        else {
+            // recurse array or object
+            var n, v, json = [], arr = (obj && obj.constructor === Array);
+            for (n in obj) {
+                // jslint hack to validate for..in
+                if (true) {
+                    v = obj[n];
+                    t = typeof(v);
+                    if (t === "string") {
+                        v = '"' + v + '"';
+                    }
+                    else if (t === "object" && v !== null) {
+                        v = JSON.stringify(v);
+                    }
+                    json.push((arr ? "" : '"' + n + '": ') + String(v));
+                }
+            }
+            return (arr ? "[" : "{") + String(json) + (arr ? "]" : "}");
+        }
+    };
 
 }(window, document, window.jQuery));

@@ -2,7 +2,7 @@
  * jQuery Form Validation
  *
  * @author Tom Bertrand
- * @version 1.3.0 (2014-07-24)
+ * @version 1.3.0 (2014-07-25)
  *
  * @copyright
  * Copyright (C) 2014 Tom Bertrand.
@@ -457,6 +457,8 @@
          */
         function validateForm () {
 
+            var isValid = true;
+
             $.each(
                 $(node).find('[' + _data.validation + '],[' + _data.regex + ']'),
                 function (index, input) {
@@ -465,12 +467,14 @@
                         return false;
                     }
 
-                    validateInput(input);
+                    if (!validateInput(input)) {
+                        isValid = false;
+                    }
 
                 }
             );
 
-            return $.isEmptyObject(errors);
+            return isValid;
 
         }
 
@@ -515,7 +519,7 @@
             }
 
             // Validates the "data-validation"
-            if (!$.isEmptyObject(validationArray)) {
+            if (validationArray instanceof Array && validationArray.length > 0) {
 
                 // "OPTIONAL" input will not be validated if it's empty
                 if (value === '' && $.inArray('OPTIONAL', validationArray) !== -1) {
@@ -590,6 +594,7 @@
                         'message': 'WARNING - Invalid [data-validation-regex] on input ' + inputName
                     });
 
+                    // Do not block validation if a regexp is bad, only skip it
                     return true;
 
                 }
@@ -608,7 +613,7 @@
 
             }
 
-            return $.isEmptyObject(errors[inputName]);
+            return !errors[inputName] || errors[inputName] instanceof Array && errors[inputName].length === 0;
 
         }
 
@@ -835,6 +840,11 @@
                 errorContainer = $(node);
             }
 
+            // Prevent double error list if the previous one has not been cleared.
+            if (options.submit.settings.display === 'inline' && errorContainer.find('[' + _data.errorList + ']')[0]) {
+                return false;
+            }
+
             if (options.submit.settings.display === "inline" ||
                 (options.submit.settings.display === "block" && !errorContainer.find('[' + _data.errorList + ']')[0])
             ) {
@@ -870,13 +880,10 @@
                 input.unbind(event).on(event, function (a,b,c,d,e) {
 
                     return function () {
-
                         if (e) {
-
                             if ($(c).hasClass(options.submit.settings.errorClass)) {
                                 resetOneError(a,b,c,d,e);
                             }
-
                         } else if ($(b).hasClass(options.submit.settings.errorClass)) {
                             resetOneError(a,b,c,d);
                         }
@@ -1466,7 +1473,7 @@
                 return false;
             }
 
-            if (typeof error !== "object" || $.isEmptyObject(error) || Object.prototype.toString.call(error) !== "[object Object]") {
+            if (typeof error !== "object" || Object.prototype.toString.call(error) !== "[object Object]") {
                 window.debug('$.addError - Invalid error object.');
                 return false;
             }
@@ -1518,7 +1525,7 @@
          * Note: The same form jQuery selector MUST be used to recuperate the Validation configuration.
          *
          * @example
-         * $('#form-signup_v3').removeError([
+         * $('#form-signin_v2').removeError([
          *     'signin_v2[username]',
          *     'signin_v2[password]'
          * ])
@@ -1540,7 +1547,7 @@
                 return false;
             }
 
-            if (typeof inputName === "object" && ($.isEmptyObject(inputName) || Object.prototype.toString.call(inputName) !== "[object Array]")) {
+            if (typeof inputName === "object" && Object.prototype.toString.call(inputName) !== "[object Array]") {
                 window.debug('$.removeError - Invalid inputName array.');
                 return false;
             }
@@ -1579,7 +1586,7 @@
 
     window.Debug = {
 
-        table: [],
+        table: {},
         log: function (debugObject) {
 
             if (!debugObject.message || typeof debugObject.message !== "string") {
@@ -1621,7 +1628,7 @@
                 console.log('Debug is not available on your current browser, try the most recent version of Chrome or Firefox.');
             }
 
-            this.table = [];
+            this.table = {};
 
         }
 

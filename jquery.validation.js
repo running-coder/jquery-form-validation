@@ -2,7 +2,7 @@
  * jQuery Form Validation
  *
  * @author Tom Bertrand
- * @version 1.3.0 (2014-07-25)
+ * @version 1.3.1 (2014-07-31)
  *
  * @copyright
  * Copyright (C) 2014 Tom Bertrand.
@@ -1328,22 +1328,43 @@
             if (typeof node === "function") {
 
                 if (!options.submit.settings.form) {
-                    window.debug('$.validate - Undefined property "options.submit.settings.form" - Validation dropped.');
+
+                    window.Debug.log({
+                        'node': node,
+                        'function': '$.validate()',
+                        'arguments': '',
+                        'message': 'Undefined property "options.submit.settings.form - Validation dropped'
+                    });
+
+                    window.Debug.print();
                     return;
                 }
 
                 node = $(options.submit.settings.form);
 
                 if (!node[0]) {
-                    window.debug('$.validate - Unable to find jQuery form element "options.submit.settings.form" - ' + options.submit.settings.form + ' - Validation dropped.');
+                    window.Debug.log({
+                        'node': node,
+                        'function': '$.validate()',
+                        'arguments': JSON.stringify(options.submit.settings.form),
+                        'message': 'Unable to find jQuery form element - Validation dropped'
+                    });
+
+                    window.Debug.print();
                     return;
                 }
 
             } else if (typeof node[0] === 'undefined') {
 
-                window.debug('$("' + node['selector'] + '").validate() - Unable to find jQuery element - Validation dropped.');
-                return;
+                window.Debug.log({
+                    'node': node,
+                    'function': '$.validate()',
+                    'arguments': '$("' + node['selector'] + '").validate()',
+                    'message': 'Unable to find jQuery form element - Validation dropped'
+                });
 
+                window.Debug.print();
+                return;
             }
 
             return node.each(function () {
@@ -1469,12 +1490,28 @@
         addError: function (node, error) {
 
             if (!window.Validation.form[node.selector]) {
-                window.debug('$.addError - Invalid node selector - Make sure you are using the same one you initialize the Validation with.');
+
+                window.Debug.log({
+                    'node': node,
+                    'function': '$.addError()',
+                    'arguments': 'window.Validation.form[' + JSON.stringify(node.selector) + ']',
+                    'message': 'ERROR - Invalid node selector'
+                });
+
+                window.Debug.print();
                 return false;
             }
 
             if (typeof error !== "object" || Object.prototype.toString.call(error) !== "[object Object]") {
-                window.debug('$.addError - Invalid error object.');
+
+                window.Debug.log({
+                    'node': node,
+                    'function': '$.addError()',
+                    'arguments': 'window.Validation.form[' + JSON.stringify(node.selector) + ']',
+                    'message': 'ERROR - Invalid argument, must be type object'
+                });
+
+                window.Debug.print();
                 return false;
             }
 
@@ -1492,7 +1529,15 @@
 
                 input = $(node.selector).find('[name="'+ inputName + '"]');
                 if (!input[0]) {
-                    window.debug('$.addError - Unable to find [name="' + inputName + '"] inside form: ' + node.selector + '.');
+
+                    window.Debug.log({
+                        'node': node,
+                        'function': '$.addError()',
+                        'arguments': JSON.stringify(inputName),
+                        'message': 'ERROR - Unable to find ' + '$(' + node.selector + ').find("[name="'+ inputName + '"]")'
+                    });
+
+                    window.Debug.print();
                     continue;
                 }
 
@@ -1506,7 +1551,15 @@
                 for (var i = 0; i < error[inputName].length; i++) {
 
                     if (typeof error[inputName][i] !== "string") {
-                        window.debug('$.addError - Invalid error object property - Accepted format: {"inputName": "errorString"} or {"inputName": ["errorString", "errorString"]}.');
+
+                        window.Debug.log({
+                            'node': node,
+                            'function': '$.addError()',
+                            'arguments': JSON.stringify(error[inputName][i]),
+                            'message': 'ERROR - Invalid error object property - Accepted format: {"inputName": "errorString"} or {"inputName": ["errorString", "errorString"]}'
+                        });
+
+                        window.Debug.print();
                         continue;
                     }
 
@@ -1538,7 +1591,15 @@
         removeError: function (node, inputName) {
 
             if (!window.Validation.form[node.selector]) {
-                window.debug('$.removeError - Invalid node selector - Make sure you are using the same one you initialize the Validation with.');
+
+                window.Debug.log({
+                    'node': node,
+                    'function': '$.removeError()',
+                    'arguments': 'window.Validation.form[' + JSON.stringify(node.selector) + ']',
+                    'message': 'ERROR - Invalid node selector'
+                });
+
+                window.Debug.print();
                 return false;
             }
 
@@ -1548,7 +1609,15 @@
             }
 
             if (typeof inputName === "object" && Object.prototype.toString.call(inputName) !== "[object Array]") {
-                window.debug('$.removeError - Invalid inputName array.');
+
+                window.Debug.log({
+                    'node': node,
+                    'function': '$.removeError()',
+                    'arguments': JSON.stringify(inputName),
+                    'message': 'ERROR - Invalid inputName, must be type String or Array'
+                });
+
+                window.Debug.print();
                 return false;
             }
 
@@ -1561,7 +1630,15 @@
 
                 input = $(node.selector).find('[name="'+ inputName[i] + '"]');
                 if (!input[0]) {
-                    window.debug('$.removeError - Unable to find [name="' + inputName[i] + '"] inside form: ' + node.selector + '.');
+
+                    window.Debug.log({
+                        'node': node,
+                        'function': '$.removeError()',
+                        'arguments': JSON.stringify(inputName[i]),
+                        'message': 'ERROR - Unable to find ' + '$(' + node.selector + ').find("[name="'+ inputName[i] + '"]")'
+                    });
+
+                    window.Debug.print();
                     continue;
                 }
 
@@ -1571,17 +1648,6 @@
 
         }
 
-    };
-
-    /**
-     * Creates a fail-safe debugging system inside the console
-     */
-    window.debug = function () {
-        if (this.console && this.console.debug) {
-            this.console.debug('DEBUG: ' + Array.prototype.slice.call(arguments));
-        } else {
-            window.log('DEBUG: ' + Array.prototype.slice.call(arguments));
-        }
     };
 
     window.Debug = {

@@ -2,7 +2,7 @@
  * jQuery Form Validation
  *
  * @author Tom Bertrand
- * @version 1.3.1 (2014-07-31)
+ * @version 1.3.2 (2014-08-1)
  *
  * @copyright
  * Copyright (C) 2014 Tom Bertrand.
@@ -238,9 +238,9 @@
                     continue;
                 }
 
-                if (options.debug && (!_options[method] || !(options[method] instanceof Object))) {
+                if (!_options[method] || !(options[method] instanceof Object)) {
 
-                    window.Debug.log({
+                    options.debug && window.Debug.log({
                         'node': node,
                         'function': 'extendOptions()',
                         'arguments': '{' + method + ': ' + JSON.stringify(options[method]) + '}',
@@ -327,8 +327,8 @@
                 'message': 'OK - Dynamic Validation activated on ' + $(node).length + ' form(s)'
             });
 
-            if (options.debug && !$(node).find('[' + _data.validation + '],[' + _data.regex + ']')[0]) {
-                window.Debug.log({
+            if ( !$(node).find('[' + _data.validation + '],[' + _data.regex + ']')[0]) {
+                options.debug && window.Debug.log({
                     'node': node,
                     'function': 'delegateDynamicValidation()',
                     'arguments': '$(node).find([' + _data.validation + '],[' + _data.regex + '])',
@@ -405,14 +405,16 @@
                 'message': 'OK - Validation activated on ' + $(node).length + ' form(s)'
             });
 
-            if (options.debug && !$(node).find(options.submit.settings.button)[0]) {
-                 window.Debug.log({
+            if (!$(node).find(options.submit.settings.button)[0]) {
+
+                options.debug && window.Debug.log({
                     'node': node,
                     'function': 'delegateDynamicValidation()',
                     'arguments': '$(node).find(' + options.submit.settings.button + ')',
                     'message': 'ERROR - ' + options.submit.settings.button + ' not found'
                 });
                 return false;
+
             }
 
             $(node).on("submit", false );

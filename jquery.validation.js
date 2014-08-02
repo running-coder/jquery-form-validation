@@ -504,10 +504,20 @@
                 return false;
             }
 
-            var value = _getInputValue(input),
+            var inputShortName;
 
-                matches = inputName.replace(/]$/, '').split(/]\[|[[\]]/g),
-                inputShortName = matches[matches.length - 1],
+            if (options.submit.settings.inputContainer) {
+                inputShortName = $(input).closest(options.submit.settings.inputContainer).find('label').text();
+            }
+
+            if (!inputShortName) {
+
+                var matches = inputName.replace(/]$/, '').split(/]\[|[[\]]/g);
+                inputShortName = matches[matches.length - 1];
+
+            }
+
+            var value = _getInputValue(input),
 
                 validationArray = $(input).attr(_data.validation),
                 validationMessage = $(input).attr(_data.validationMessage),

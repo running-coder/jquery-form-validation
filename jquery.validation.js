@@ -2,7 +2,7 @@
  * jQuery Form Validation
  *
  * @author Tom Bertrand
- * @version 1.3.2 (2014-08-1)
+ * @version 1.3.3 (2014-08-16)
  *
  * @copyright
  * Copyright (C) 2014 Tom Bertrand.
@@ -19,6 +19,7 @@
     window.Validation = {
         form: [],
         messages: null,
+        labels: null,
         hasScrolled: false
     };
 
@@ -61,9 +62,6 @@
         OPTIONAL: /^.*$/,
         // Validate values or length by comparison
         COMPARISON: /^\s*([LV])\s*([<>]=?|==|!=)\s*([^<>=!]+?)\s*$/
-        // Validate credit card number
-        //@TODO: Implement this ..
-        //ZIP: /^(?!([a-y]{1}\d{1}[a-z]{1}[-\s]?\d{1}[a-z]{1}\d{1})$).*$/i.test('g1q b1g')
     };
 
     /**
@@ -101,7 +99,8 @@
         validationMessage: 'data-validation-message',
         regex: 'data-validation-regex',
         regexMessage: 'data-validation-regex-message',
-        validationGroup: 'data-validation-group',
+        group: 'data-validation-group',
+        label: 'data-validation-label',
         errorList: 'data-error-list'
     };
 
@@ -147,6 +146,7 @@
              }
          },
          messages: {},
+         labels: {},
          debug: false
      };
 
@@ -234,7 +234,12 @@
 
             for (var method in options) {
 
-                if (!options.hasOwnProperty(method) || method === "debug") {
+                if (!options.hasOwnProperty(method) || method === "debug" || method === "messages") {
+                    continue;
+                }
+
+                if (method === "labels" && options[method] instanceof Object) {
+                    tpmOptions[method] = options[method];
                     continue;
                 }
 
@@ -507,7 +512,10 @@
             var value = _getInputValue(input),
 
                 matches = inputName.replace(/]$/, '').split(/]\[|[[\]]/g),
-                inputShortName = matches[matches.length - 1],
+                inputShortName = window.Validation.labels[inputName] ||
+                                 options.labels[inputName] ||
+                                 $(input).attr(_data.label) ||
+                                 matches[matches.length - 1],
 
                 validationArray = $(input).attr(_data.validation),
                 validationMessage = $(input).attr(_data.validationMessage),
@@ -798,7 +806,7 @@
                 return false;
             }
 
-            group = input.attr(_data.validationGroup);
+            group = input.attr(_data.group);
 
             if (group) {
 
@@ -810,7 +818,7 @@
                     errorContainer = label;
                 }
 
-                //$(node).find('[' + _data.validationGroup + '="' + group + '"]').addClass(options.submit.settings.errorClass)
+                //$(node).find('[' + _data.group + '="' + group + '"]').addClass(options.submit.settings.errorClass)
 
             } else {
 

@@ -2,24 +2,27 @@
  * jQuery Form Validation
  *
  * @author Tom Bertrand
- * @version 1.3.3 (2014-08-16)
+ * @version 1.3.4 (2014-09-10)
  *
  * @copyright
- * Copyright (C) 2014 Tom Bertrand.
+ * Copyright (C) 2014 RunningCoder.
  *
  * @link
  * http://www.runningcoder.org/jqueryvalidation/
  *
  * @license
  * Licensed under the MIT license.
+ *
+ * @note
+ * Remove debug code: //\s?\{debug\}[\s\S]*?\{/debug\}
  */
 (function (window, document, $, undefined)
 {
 
     window.Validation = {
         form: [],
-        messages: null,
-        labels: null,
+        messages: {},
+        labels: {},
         hasScrolled: false
     };
 
@@ -206,12 +209,14 @@
 
             _extendedMessages = true;
 
+            // {debug}
             options.debug && window.Debug.log({
                 'node': node,
                 'function': 'extendMessage()',
                 'arguments': JSON.stringify(window.Validation.messages),
                 'message': 'OK - Overriding ' + node + ' default message(s)'
             });
+            // {/debug}
 
         }
 
@@ -245,12 +250,14 @@
 
                 if (!_options[method] || !(options[method] instanceof Object)) {
 
+                    // {debug}
                     options.debug && window.Debug.log({
                         'node': node,
                         'function': 'extendOptions()',
                         'arguments': '{' + method + ': ' + JSON.stringify(options[method]) + '}',
                         'message': 'WARNING - ' + method + ' - invalid option'
                     });
+                    // {/debug}
 
                     continue;
                 }
@@ -262,12 +269,14 @@
 
                     if (!_options[method][type] || !(options[method][type] instanceof Object)) {
 
+                        // {debug}
                         options.debug && window.Debug.log({
                             'node': node,
                             'function': 'extendOptions()',
                             'arguments': '{' + type + ': ' + JSON.stringify(options[method][type]) + '}',
                             'message': 'WARNING - ' + type + ' - invalid option'
                         });
+                        // {/debug}
 
                         continue;
                     }
@@ -282,12 +291,14 @@
                             _supported[method][type][option] &&
                             $.inArray(options[method][type][option], _supported[method][type][option]) === -1) {
 
+                            // {debug}
                             options.debug && window.Debug.log({
                                 'node': node,
                                 'function': 'extendOptions()',
                                 'arguments': '{' + option + ': ' + JSON.stringify(options[method][type][option]) + '}',
                                 'message': 'WARNING - ' + option.toString() + ': ' + JSON.stringify(options[method][type][option]) + ' - unsupported option'
                             });
+                            // {/debug}
 
                             delete options[method][type][option];
                         }
@@ -299,9 +310,11 @@
                 }
             }
 
+            // {debug}
             if (options.debug && $.inArray(options.debug, _supported['debug'] !== -1)) {
                 tpmOptions.debug = options.debug;
             }
+            // {/debug}
 
             // @TODO Would there be a better fix to solve event conflict?
             if (tpmOptions.dynamic.settings.trigger) {
@@ -325,20 +338,26 @@
                 return false;
             }
 
+            // {debug}
             options.debug && window.Debug.log({
                 'node': node,
                 'function': 'delegateDynamicValidation()',
                 'arguments': JSON.stringify(options),
                 'message': 'OK - Dynamic Validation activated on ' + $(node).length + ' form(s)'
             });
+            // {/debug}
 
             if ( !$(node).find('[' + _data.validation + '],[' + _data.regex + ']')[0]) {
+
+                // {debug}
                 options.debug && window.Debug.log({
                     'node': node,
                     'function': 'delegateDynamicValidation()',
                     'arguments': '$(node).find([' + _data.validation + '],[' + _data.regex + '])',
                     'message': 'ERROR - [' + _data.validation + '] not found'
                 });
+                // {/debug}
+
                 return false;
             }
 
@@ -403,21 +422,26 @@
 
             var event = options.submit.settings.trigger + '.vd';
 
+            // {debug}
             options.debug && window.Debug.log({
                 'node': node,
                 'function': 'delegateValidation()',
                 'arguments': JSON.stringify(options),
                 'message': 'OK - Validation activated on ' + $(node).length + ' form(s)'
             });
+            // {/debug}
 
             if (!$(node).find(options.submit.settings.button)[0]) {
 
+                // {debug}
                 options.debug && window.Debug.log({
                     'node': node,
                     'function': 'delegateDynamicValidation()',
                     'arguments': '$(node).find(' + options.submit.settings.button + ')',
                     'message': 'ERROR - ' + options.submit.settings.button + ' not found'
                 });
+                // {/debug}
+
                 return false;
 
             }
@@ -448,7 +472,9 @@
 
                 }
 
+                // {debug}
                 options.debug && window.Debug.print();
+                // {/debug}
 
                 return false;
 
@@ -499,12 +525,14 @@
 
             if (!inputName) {
 
+                // {debug}
                 options.debug && window.Debug.log({
                     'node': node,
                     'function': 'validateInput()',
                     'arguments': '$(input).attr("name")',
                     'message': 'ERROR - Missing input [name]'
                 });
+                // {/debug}
 
                 return false;
             }
@@ -597,12 +625,14 @@
 
                 } catch (error) {
 
+                    // {debug}
                     options.debug && window.Debug.log({
                         'node': node,
                         'function': 'validateInput()',
                         'arguments': '{pattern: {' + pattern + '}, modifier: {' + patternModifier+ '}',
                         'message': 'WARNING - Invalid [data-validation-regex] on input ' + inputName
                     });
+                    // {/debug}
 
                     // Do not block validation if a regexp is bad, only skip it
                     return true;
@@ -659,12 +689,14 @@
 
             if (!comparison || comparison.length !== 4) {
 
+                // {debug}
                 options.debug && window.Debug.log({
                     'node': node,
                     'function': 'validateRule()',
                     'arguments': 'value: ' + value + ' rule: ' + rule,
                     'message': 'WARNING - Invalid comparison'
                 });
+                // {/debug}
 
                 return;
             }
@@ -682,12 +714,14 @@
                     // Only numeric value for "L" are allowed
                     if (isNaN(compared)) {
 
+                        // {debug}
                         options.debug && window.Debug.log({
                             'node': node,
                             'function': 'validateRule()',
                             'arguments': 'compare: ' + compared + ' rule: ' + rule,
                             'message': 'WARNING - Invalid rule, "L" compare must be numeric'
                         });
+                        // {/debug}
 
                         return false;
 
@@ -711,12 +745,14 @@
                         comparedValue = $(node).find('[name="' + compared + '"]').val();
                         if (!comparedValue) {
 
+                            // {debug}
                             options.debug && window.Debug.log({
                                 'node': node,
                                 'function': 'validateRule()',
                                 'arguments': 'compare: ' + compared + ' rule: ' + rule,
                                 'message': 'WARNING - Unable to find compared field [name="' + compared + '"]'
                             });
+                            // {/debug}
 
                             return false;
                         }
@@ -796,12 +832,14 @@
 
             if (!input[0]) {
 
+                // {debug}
                 options.debug && window.Debug.log({
                     'node': node,
                     'function': 'displayOneError()',
                     'arguments': '[name="' + inputName + '"]',
                     'message': 'ERROR - Unable to find input by name "' + inputName + '"'
                 });
+                // {/debug}
 
                 return false;
             }
@@ -965,12 +1003,14 @@
 
                     if (!input[0]) {
 
+                        // {debug}
                         options.debug && window.Debug.log({
                             'node': node,
                             'function': 'resetOneError()',
                             'arguments': '[name="' + inputName + '"]',
                             'message': 'ERROR - Unable to find input by name "' + inputName + '"'
                         });
+                        // {/debug}
 
                         return false;
                     }
@@ -1096,12 +1136,14 @@
 
                 if (!_isValid || typeof _callback !== "function") {
 
+                    // {debug}
                     options.debug && window.Debug.log({
                         'node': node,
                         'function': '_executeCallback()',
                         'arguments': JSON.stringify(callback),
                         'message': 'WARNING - Invalid callback function"'
                     });
+                    // {/debug}
 
                     return false;
                 }
@@ -1125,7 +1167,9 @@
             delegateDynamicValidation();
             delegateValidation();
 
+            // {debug}
             options.debug && window.Debug.print();
+            // {/debug}
 
         }();
 
@@ -1339,6 +1383,7 @@
 
                 if (!options.submit.settings.form) {
 
+                    // {debug}
                     window.Debug.log({
                         'node': node,
                         'function': '$.validate()',
@@ -1347,12 +1392,16 @@
                     });
 
                     window.Debug.print();
+                    // {/debug}
+
                     return;
                 }
 
                 node = $(options.submit.settings.form);
 
                 if (!node[0]) {
+
+                    // {debug}
                     window.Debug.log({
                         'node': node,
                         'function': '$.validate()',
@@ -1361,11 +1410,14 @@
                     });
 
                     window.Debug.print();
+                    // {/debug}
+
                     return;
                 }
 
             } else if (typeof node[0] === 'undefined') {
 
+                // {debug}
                 window.Debug.log({
                     'node': node,
                     'function': '$.validate()',
@@ -1374,6 +1426,8 @@
                 });
 
                 window.Debug.print();
+                // {/debug}
+
                 return;
             }
 
@@ -1501,6 +1555,7 @@
 
             if (!window.Validation.form[node.selector]) {
 
+                // {debug}
                 window.Debug.log({
                     'node': node,
                     'function': '$.addError()',
@@ -1509,11 +1564,14 @@
                 });
 
                 window.Debug.print();
+                // {/debug}
+
                 return false;
             }
 
             if (typeof error !== "object" || Object.prototype.toString.call(error) !== "[object Object]") {
 
+                // {debug}
                 window.Debug.log({
                     'node': node,
                     'function': '$.addError()',
@@ -1522,6 +1580,8 @@
                 });
 
                 window.Debug.print();
+                // {/debug}
+
                 return false;
             }
 
@@ -1540,6 +1600,7 @@
                 input = $(node.selector).find('[name="'+ inputName + '"]');
                 if (!input[0]) {
 
+                    // {debug}
                     window.Debug.log({
                         'node': node,
                         'function': '$.addError()',
@@ -1548,6 +1609,8 @@
                     });
 
                     window.Debug.print();
+                    // {/debug}
+
                     continue;
                 }
 
@@ -1562,6 +1625,7 @@
 
                     if (typeof error[inputName][i] !== "string") {
 
+                        // {debug}
                         window.Debug.log({
                             'node': node,
                             'function': '$.addError()',
@@ -1570,6 +1634,8 @@
                         });
 
                         window.Debug.print();
+                        // {/debug}
+
                         continue;
                     }
 
@@ -1602,6 +1668,7 @@
 
             if (!window.Validation.form[node.selector]) {
 
+                // {debug}
                 window.Debug.log({
                     'node': node,
                     'function': '$.removeError()',
@@ -1610,6 +1677,8 @@
                 });
 
                 window.Debug.print();
+                // {/debug}
+
                 return false;
             }
 
@@ -1620,6 +1689,7 @@
 
             if (typeof inputName === "object" && Object.prototype.toString.call(inputName) !== "[object Array]") {
 
+                // {debug}
                 window.Debug.log({
                     'node': node,
                     'function': '$.removeError()',
@@ -1628,6 +1698,8 @@
                 });
 
                 window.Debug.print();
+                // {/debug}
+
                 return false;
             }
 
@@ -1641,6 +1713,7 @@
                 input = $(node.selector).find('[name="'+ inputName[i] + '"]');
                 if (!input[0]) {
 
+                    // {debug}
                     window.Debug.log({
                         'node': node,
                         'function': '$.removeError()',
@@ -1649,6 +1722,8 @@
                     });
 
                     window.Debug.print();
+                    // {/debug}
+
                     continue;
                 }
 
@@ -1660,6 +1735,7 @@
 
     };
 
+    // {debug}
     window.Debug = {
 
         table: {},
@@ -1709,10 +1785,11 @@
         }
 
     };
+    // {/debug}
 
     String.prototype.capitalize = function() {
         return this.charAt(0).toUpperCase() + this.slice(1);
-    }
+    };
 
     /**
      * Creates a String from a JSON object

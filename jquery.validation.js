@@ -2,7 +2,7 @@
  * jQuery Form Validation
  *
  * @author Tom Bertrand
- * @version 1.3.4 (2014-09-10)
+ * @version 1.3.5 (2014-09-10)
  *
  * @copyright
  * Copyright (C) 2014 RunningCoder.
@@ -21,7 +21,7 @@
 
     window.Validation = {
         form: [],
-        messages: {},
+        messages: null,
         labels: {},
         hasScrolled: false
     };
@@ -208,15 +208,6 @@
             _messages = $.extend(_messages, window.Validation.messages);
 
             _extendedMessages = true;
-
-            // {debug}
-            options.debug && window.Debug.log({
-                'node': node,
-                'function': 'extendMessage()',
-                'arguments': JSON.stringify(window.Validation.messages),
-                'message': 'OK - Overriding ' + node + ' default message(s)'
-            });
-            // {/debug}
 
         }
 

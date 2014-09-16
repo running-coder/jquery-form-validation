@@ -334,17 +334,17 @@
                 'node': node,
                 'function': 'delegateDynamicValidation()',
                 'arguments': JSON.stringify(options),
-                'message': 'OK - Dynamic Validation activated on ' + $(node).length + ' form(s)'
+                'message': 'OK - Dynamic Validation activated on ' + node.length + ' form(s)'
             });
             // {/debug}
 
-            if ( !$(node).find('[' + _data.validation + '],[' + _data.regex + ']')[0]) {
+            if ( !node.find('[' + _data.validation + '],[' + _data.regex + ']')[0]) {
 
                 // {debug}
                 options.debug && window.Debug.log({
                     'node': node,
                     'function': 'delegateDynamicValidation()',
-                    'arguments': '$(node).find([' + _data.validation + '],[' + _data.regex + '])',
+                    'arguments': 'node.find([' + _data.validation + '],[' + _data.regex + '])',
                     'message': 'ERROR - [' + _data.validation + '] not found'
                 });
                 // {/debug}
@@ -359,7 +359,7 @@
             }
 
             $.each(
-                $(node).find('[' + _data.validation + '],[' + _data.regex + ']'),
+                node.find('[' + _data.validation + '],[' + _data.regex + ']'),
                 function (index, input) {
 
                     $(input).unbind(event).on(event, function (e) {
@@ -395,14 +395,6 @@
             )
         }
 
-        var _typeWatch = (function(){
-            var timer = 0;
-            return function(callback, ms){
-                clearTimeout (timer);
-                timer = setTimeout(callback, ms);
-            }
-        })();
-
         /**
          * Delegates the submit validation on data-validation and data-validation-regex attributes based on trigger.
          * Note: Disable the form submit function so the callbacks are not by-passed
@@ -418,17 +410,17 @@
                 'node': node,
                 'function': 'delegateValidation()',
                 'arguments': JSON.stringify(options),
-                'message': 'OK - Validation activated on ' + $(node).length + ' form(s)'
+                'message': 'OK - Validation activated on ' + node.length + ' form(s)'
             });
             // {/debug}
 
-            if (!$(node).find(options.submit.settings.button)[0]) {
+            if (!node.find(options.submit.settings.button)[0]) {
 
                 // {debug}
                 options.debug && window.Debug.log({
                     'node': node,
                     'function': 'delegateDynamicValidation()',
-                    'arguments': '$(node).find(' + options.submit.settings.button + ')',
+                    'arguments': 'node.find(' + options.submit.settings.button + ')',
                     'message': 'ERROR - ' + options.submit.settings.button + ' not found'
                 });
                 // {/debug}
@@ -437,8 +429,8 @@
 
             }
 
-            $(node).on("submit", false );
-            $(node).find(options.submit.settings.button).unbind(event).on(event, function (e) {
+            node.on("submit", false);
+            node.find(options.submit.settings.button).unbind(event).on(event, function (e) {
 
                 e.preventDefault();
 
@@ -484,7 +476,7 @@
             var isValid = true;
 
             $.each(
-                $(node).find('[' + _data.validation + '],[' + _data.regex + ']'),
+                node.find('[' + _data.validation + '],[' + _data.regex + ']'),
                 function (index, input) {
 
                     if ($(this).is(':disabled')) {
@@ -733,7 +725,7 @@
                     // Compare Field values
                     if (isNaN(compared)) {
 
-                        comparedValue = $(node).find('[name="' + compared + '"]').val();
+                        comparedValue = node.find('[name="' + compared + '"]').val();
                         if (!comparedValue) {
 
                             // {debug}
@@ -817,7 +809,7 @@
                 return false;
             }
 
-            input = $(node).find('[name="' + inputName + '"]');
+            input = node.find('[name="' + inputName + '"]');
 
             label = null;
 
@@ -839,15 +831,15 @@
 
             if (group) {
 
-                groupInput = $(node).find('[name="' + inputName + '"]');
-                label = $(node).find('[id="' + group + '"]');
+                groupInput = node.find('[name="' + inputName + '"]');
+                label = node.find('[id="' + group + '"]');
 
                 if (label[0]) {
                     label.addClass(options.submit.settings.errorClass);
                     errorContainer = label;
                 }
 
-                //$(node).find('[' + _data.group + '="' + group + '"]').addClass(options.submit.settings.errorClass)
+                //node.find('[' + _data.group + '="' + group + '"]').addClass(options.submit.settings.errorClass)
 
             } else {
 
@@ -860,7 +852,7 @@
                 inputId = input.attr('id');
 
                 if (inputId) {
-                    label = $(node).find('label[for="' + inputId + '"]')[0];
+                    label = node.find('label[for="' + inputId + '"]')[0];
                 }
 
                 if (!label) {
@@ -876,7 +868,7 @@
             if (options.submit.settings.display === 'inline') {
                 errorContainer = errorContainer || input.parent();
             } else if (options.submit.settings.display === 'block') {
-                errorContainer = $(node);
+                errorContainer = node;
             }
 
             // Prevent double error list if the previous one has not been cleared.
@@ -990,7 +982,7 @@
             } else {
 
                 if (!input) {
-                    input = $(node).find('[name="' + inputName + '"]');
+                    input = node.find('[name="' + inputName + '"]');
 
                     if (!input[0]) {
 
@@ -1022,18 +1014,20 @@
             errors = [];
             window.Validation.hasScrolled = false;
 
-            $(node).find('[' + _data.errorList + ']').remove();
-            $(node).find('.' + options.submit.settings.errorClass).removeClass(options.submit.settings.errorClass);
+            node.find('[' + _data.errorList + ']').remove();
+            node.find('.' + options.submit.settings.errorClass).removeClass(options.submit.settings.errorClass);
 
         }
 
         /**
          * Submits the form once it succeeded the validation process.
-         * Note: This function will be overridden if "options.submit.settings.onSubmit" is defined
+         * Note:
+         * - This function will be overridden if "options.submit.settings.onSubmit" is defined
+         * - The node can't be submitted by jQuery since it has been disabled, use the form native submit function instead
          */
         function submitForm () {
 
-            node.submit();
+            node[0].submit()
 
         }
 
@@ -1055,7 +1049,7 @@
                     value = ($(input).is(':checked')) ? 1 : '';
                     break;
                 case 'radio':
-                    value = $(node).find('input[name="' + $(input).attr('name') + '"]:checked').val() || '';
+                    value = node.find('input[name="' + $(input).attr('name') + '"]:checked').val() || '';
                     break;
                 default:
                     value = $(input).val();
@@ -1065,6 +1059,19 @@
             return value;
 
         };
+
+        /**
+         * @private
+         * Execute function once the timer is reached.
+         * If the function is recalled before the timer ends, the first call will be canceled.
+         */
+        var _typeWatch = (function(){
+            var timer = 0;
+            return function(callback, ms){
+                clearTimeout (timer);
+                timer = setTimeout(callback, ms);
+            }
+        })();
 
         /**
          * @private
@@ -1423,9 +1430,7 @@
             }
 
             return node.each(function () {
-
-                window.Validation.form[node.selector] = new Validation(this, options);
-
+                window.Validation.form[node.selector] = new Validation($(this), options);
             });
 
         },

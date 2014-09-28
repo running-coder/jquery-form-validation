@@ -2,7 +2,7 @@
  * jQuery Form Validation
  *
  * @author Tom Bertrand
- * @version 1.3.5 (2014-09-10)
+ * @version 1.4.0 (2014-09-28)
  *
  * @copyright
  * Copyright (C) 2014 RunningCoder.
@@ -72,25 +72,25 @@
      * Error messages
      */
     var _messages = Object.preventExtensions({
-        'default': '$ contain error(s).',
-        'NOTEMPTY': '$ must not be empty.',
-        'NUMERIC': '$ must be numeric.',
-        'STRING': '$ must be a string.',
-        'NOSPACE': '$ must not contain spaces.',
-        'TRIM': '$ must not start or end with space character.',
-        'MIXED': '$ must be letters or numbers (no special characters).',
-        'DATE': '$ is not a valid with format YYYY-MM-DD.',
-        'EMAIL': '$ is not valid.',
-        'URL': '$ is not valid.',
-        'PHONE': '$ is not a valid phone number.',
-        //'INARRAY': '$ is not a valid option.',
-        '<': '$ must be less than % characters.',
-        '<=': '$ must be less or equal to % characters.',
-        '>': '$ must be greater than % characters.',
-        '>=': '$ must be greater or equal to % characters.',
-        '==': '$ must be equal to %',
-        '!=': '$ must be different than %'
-    }),
+            'default': '$ contain error(s).',
+            'NOTEMPTY': '$ must not be empty.',
+            'NUMERIC': '$ must be numeric.',
+            'STRING': '$ must be a string.',
+            'NOSPACE': '$ must not contain spaces.',
+            'TRIM': '$ must not start or end with space character.',
+            'MIXED': '$ must be letters or numbers (no special characters).',
+            'DATE': '$ is not a valid with format YYYY-MM-DD.',
+            'EMAIL': '$ is not valid.',
+            'URL': '$ is not valid.',
+            'PHONE': '$ is not a valid phone number.',
+            //'INARRAY': '$ is not a valid option.',
+            '<': '$ must be less than % characters.',
+            '<=': '$ must be less or equal to % characters.',
+            '>': '$ must be greater than % characters.',
+            '>=': '$ must be greater or equal to % characters.',
+            '==': '$ must be equal to %',
+            '!=': '$ must be different than %'
+        }),
         _extendedMessages = false;
 
     /**
@@ -113,45 +113,45 @@
      *
      * @link http://www.runningcoder.org/jqueryvalidation/documentation/
      */
-     var _options = {
-         submit: {
-             settings: {
-                 form: null,
-                 display: "inline",
-                 insertion: "append",
-                 allErrors: false,
-                 trigger: "click",
-                 button: "input[type='submit']",
-                 errorClass: "error",
-                 errorListClass: "error-list",
-                 inputContainer: null,
-                 clear: "focusin",
-                 scrollToError: false
-             },
-             callback: {
-                 onInit: null,
-                 onValidate: null,
-                 onError: null,
-                 onBeforeSubmit: null,
-                 onSubmit: null,
-                 onAfterSubmit: null
-             }
-         },
-         dynamic: {
-             settings: {
-                 trigger: null,
-                 delay: 300
-             },
-             callback: {
-                 onSuccess: null,
-                 onError: null,
-                 onComplete: null
-             }
-         },
-         messages: {},
-         labels: {},
-         debug: false
-     };
+    var _options = {
+        submit: {
+            settings: {
+                form: null,
+                display: "inline",
+                insertion: "append",
+                allErrors: false,
+                trigger: "click",
+                button: "input[type='submit']",
+                errorClass: "error",
+                errorListClass: "error-list",
+                inputContainer: null,
+                clear: "focusin",
+                scrollToError: false
+            },
+            callback: {
+                onInit: null,
+                onValidate: null,
+                onError: null,
+                onBeforeSubmit: null,
+                onSubmit: null,
+                onAfterSubmit: null
+            }
+        },
+        dynamic: {
+            settings: {
+                trigger: null,
+                delay: 300
+            },
+            callback: {
+                onSuccess: null,
+                onError: null,
+                onComplete: null
+            }
+        },
+        messages: {},
+        labels: {},
+        debug: false
+    };
 
     /**
      * @private
@@ -191,8 +191,11 @@
      */
     var Validation = function (node, options) {
 
-        var errors = [];
-            window.Validation.hasScrolled = false;
+        var errors = [],
+            delegateSuffix = ".vd", // validation.delegate
+            resetSuffix = ".vr";    // validation.resetError
+
+        window.Validation.hasScrolled = false;
 
         /**
          * Extends user-defined "message" into the default Validation "_message".
@@ -352,10 +355,9 @@
                 return false;
             }
 
-            var namespace = ".vd", // validation.delegate
-                event = options.dynamic.settings.trigger + namespace;
+            var event = options.dynamic.settings.trigger + delegateSuffix;
             if (options.dynamic.settings.trigger !== "focusout") {
-                event += " change" + namespace + " paste" + namespace;
+                event += " change" + delegateSuffix + " paste" + delegateSuffix;
             }
 
             $.each(
@@ -419,9 +421,9 @@
                 // {debug}
                 options.debug && window.Debug.log({
                     'node': node,
-                    'function': 'delegateDynamicValidation()',
-                    'arguments': 'node.find(' + options.submit.settings.button + ')',
-                    'message': 'ERROR - ' + options.submit.settings.button + ' not found'
+                    'function': 'delegateValidation()',
+                    'arguments': '{button: ' + options.submit.settings.button + '}',
+                    'message': 'ERROR - node.find("' + options.submit.settings.button + '") not found'
                 });
                 // {/debug}
 
@@ -524,9 +526,9 @@
 
                 matches = inputName.replace(/]$/, '').split(/]\[|[[\]]/g),
                 inputShortName = window.Validation.labels[inputName] ||
-                                 options.labels[inputName] ||
-                                 $(input).attr(_data.label) ||
-                                 matches[matches.length - 1],
+                    options.labels[inputName] ||
+                    $(input).attr(_data.label) ||
+                    matches[matches.length - 1],
 
                 validationArray = $(input).attr(_data.validation),
                 validationMessage = $(input).attr(_data.validationMessage),
@@ -744,9 +746,8 @@
                             throw [options.messages[operator].replace(' characters', ''), compared];
                         }
 
-                    // Compare numeric value
                     } else {
-
+                    // Compare numeric value
                         if (!value || isNaN(value) || !eval(value + operator + parseFloat(compared))) {
                             throw [options.messages[operator].replace(' characters', ''), compared];
                         }
@@ -878,7 +879,7 @@
 
             if (options.submit.settings.display === "inline" ||
                 (options.submit.settings.display === "block" && !errorContainer.find('[' + _data.errorList + ']')[0])
-            ) {
+                ) {
                 if (options.submit.settings.insertion === 'append') {
                     errorContainer.append(html);
                 } else if (options.submit.settings.insertion === 'prepend') {
@@ -896,15 +897,14 @@
                     input = groupInput;
                 }
 
-                var namespace = ".vr", //validation.resetError
-                    event = "coucou" + namespace;
+                var event = "coucou" + resetSuffix;
                 if (options.submit.settings.clear) {
-                    event += " " + options.submit.settings.clear + namespace
+                    event += " " + options.submit.settings.clear + resetSuffix
                 }
                 if (options.dynamic.settings.trigger) {
-                    event += " " + options.dynamic.settings.trigger + namespace;
+                    event += " " + options.dynamic.settings.trigger + resetSuffix;
                     if (options.dynamic.settings.trigger !== "focusout") {
-                        event += " change" + namespace + " paste" + namespace;
+                        event += " change" + resetSuffix + " paste" + resetSuffix;
                     }
                 }
 
@@ -999,9 +999,7 @@
                     }
                 }
 
-                //$._data( input[0], "events" );
-                input.trigger('coucou.vr');
-
+                input.trigger('coucou' + resetSuffix);
             }
 
         }
@@ -1028,6 +1026,38 @@
         function submitForm () {
 
             node[0].submit()
+
+        }
+
+        /**
+         * Submits the form once it succeeded the validation process.
+         * Note:
+         * - This function will be overridden if "options.submit.settings.onSubmit" is defined
+         * - The node can't be submitted by jQuery since it has been disabled, use the form native submit function instead
+         *
+         * @returns {boolean}
+         */
+        function destroy () {
+
+            var event = options.submit.settings.trigger + delegateSuffix;
+
+            if (options.dynamic.settings.trigger) {
+                event += " " + options.dynamic.settings.trigger + delegateSuffix;
+                if (options.dynamic.settings.trigger !== "focusout") {
+                    event += " change" + delegateSuffix + " paste" + delegateSuffix;
+                }
+            }
+
+            $.each(
+                node.find('[' + _data.validation + '],[' + _data.regex + ']'),
+                function (i, v) {
+                    $(v).unbind(event);
+                }
+            );
+
+            //delete window.Validation.form[node.selector];
+
+            return true;
 
         }
 
@@ -1206,7 +1236,13 @@
              * @public
              * Remove all errors
              */
-            resetErrors: resetErrors
+            resetErrors: resetErrors,
+
+            /**
+             * @public
+             * Destroy the Validation instance
+             */
+            destroy: destroy
 
         };
 
@@ -1427,6 +1463,30 @@
                 // {/debug}
 
                 return;
+            }
+
+            if (options === "destroy") {
+
+                if (!window.Validation.form[node.selector]) {
+
+                    // {debug}
+                    window.Debug.log({
+                        'node': node,
+                        'function': '$.validate("destroy")',
+                        'arguments': '',
+                        'message': 'Unable to destroy "' + node.selector + '", perhaps it\'s already destroyed?'
+                    });
+
+                    window.Debug.print();
+                    // {/debug}
+
+                    return;
+                }
+
+                window.Validation.form[node.selector].destroy();
+
+                return;
+
             }
 
             return node.each(function () {

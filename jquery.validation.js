@@ -121,7 +121,7 @@
                 insertion: "append",
                 allErrors: false,
                 trigger: "click",
-                button: "input[type='submit']",
+                button: "[type='submit']",
                 errorClass: "error",
                 errorListClass: "error-list",
                 inputContainer: null,
@@ -478,7 +478,7 @@
             var isValid = true;
 
             $.each(
-                node.find('[' + _data.validation + '],[' + _data.regex + ']'),
+                node.find('[' + _data.validation + ']:not([readonly], [disabled]),[' + _data.regex + ']:not([readonly], [disabled])'),
                 function (index, input) {
 
                     if ($(this).is(':disabled')) {
@@ -747,7 +747,7 @@
                         }
 
                     } else {
-                    // Compare numeric value
+                        // Compare numeric value
                         if (!value || isNaN(value) || !eval(value + operator + parseFloat(compared))) {
                             throw [options.messages[operator].replace(' characters', ''), compared];
                         }
@@ -879,7 +879,7 @@
 
             if (options.submit.settings.display === "inline" ||
                 (options.submit.settings.display === "block" && !errorContainer.find('[' + _data.errorList + ']')[0])
-                ) {
+            ) {
                 if (options.submit.settings.insertion === 'append') {
                     errorContainer.append(html);
                 } else if (options.submit.settings.insertion === 'prepend') {
@@ -1433,11 +1433,10 @@
 
                 node = $(options.submit.settings.form);
 
-                if (!node[0]) {
+                if (!node[0] || node[0].nodeName.toLowerCase() !== "form") {
 
                     // {debug}
                     window.Debug.log({
-                        'node': node,
                         'function': '$.validate()',
                         'arguments': JSON.stringify(options.submit.settings.form),
                         'message': 'Unable to find jQuery form element - Validation dropped'

@@ -1,22 +1,16 @@
 /**
  * jQuery Form Validation
+ * Copyright (C) 2014 RunningCoder.org
+ * Licensed under the MIT license
  *
  * @author Tom Bertrand
- * @version 1.4.0 (2014-09-28)
- *
- * @copyright
- * Copyright (C) 2014 RunningCoder.
- *
- * @link
- * http://www.runningcoder.org/jqueryvalidation/
- *
- * @license
- * Licensed under the MIT license.
+ * @version 1.5.0 (2015-02-03)
+ * @link http://www.runningcoder.org/jqueryvalidation/
  *
  * @note
  * Remove debug code: //\s?\{debug\}[\s\S]*?\{/debug\}
  */
-(function (window, document, $, undefined)
+;(function (window, document, $, undefined)
 {
 
     window.Validation = {
@@ -45,8 +39,10 @@
     var _rules = {
         // Validate not empty
         NOTEMPTY: /./,
+        // Validate an integer
+        INTEGER: /^\d+$/,
         // Validate a numeric
-        NUMERIC: /^[0-9]+$/,
+        NUMERIC: /^\d+(?:,\d{3})?(?:\.\d+)?$/,
         // Validate an alphanumeric string (no special chars)
         MIXED: /^[\w\s-]+$/,
         // Validate a spaceless string
@@ -71,10 +67,11 @@
      * @private
      * Error messages
      */
-    var _messages = Object.preventExtensions({
+    var _messages = {
             'default': '$ contain error(s).',
             'NOTEMPTY': '$ must not be empty.',
             'NUMERIC': '$ must be numeric.',
+            'INTEGER': '$ must be an integer.',
             'STRING': '$ must be a string.',
             'NOSPACE': '$ must not contain spaces.',
             'TRIM': '$ must not start or end with space character.',
@@ -90,7 +87,7 @@
             '>=': '$ must be greater or equal to % characters.',
             '==': '$ must be equal to %',
             '!=': '$ must be different than %'
-        }),
+        },
         _extendedMessages = false;
 
     /**
@@ -578,50 +575,11 @@
             // Validates the "data-validation-regex"
             if (validationRegex) {
 
-                var pattern = validationRegex.split('/');
+                var rule = _buildRegexFromString(validationRegex);
 
-                if (pattern.length > 1) {
-
-                    var tmpPattern = "";
-
-                    // Do not loop through the last item knowing its a potential modifier
-                    for (var k = 0; k < pattern.length - 1; k++) {
-                        if (pattern[k] !== "") {
-                            tmpPattern += pattern[k] + '/';
-                        }
-                    }
-                    // Remove last added "/"
-                    tmpPattern = tmpPattern.slice(0, -1);
-
-                    // Test the last item for modifier(s)
-                    if (/[gimsxeU]+/.test(pattern[pattern.length - 1])) {
-                        var patternModifier = pattern[pattern.length - 1];
-                    }
-
-                    pattern = tmpPattern;
-                } else {
-                    pattern = pattern[0];
-                }
-
-                // Validate the regex
-                try {
-
-                    var rule = new RegExp(pattern, patternModifier);
-
-                } catch (error) {
-
-                    // {debug}
-                    options.debug && window.Debug.log({
-                        'node': node,
-                        'function': 'validateInput()',
-                        'arguments': '{pattern: {' + pattern + '}, modifier: {' + patternModifier+ '}',
-                        'message': 'WARNING - Invalid [data-validation-regex] on input ' + inputName
-                    });
-                    // {/debug}
-
-                    // Do not block validation if a regexp is bad, only skip it
+                // Do not block validation if a regexp is bad, only skip it
+                if (!(rule instanceof RegExp)) {
                     return true;
-
                 }
 
                 try {
@@ -1328,6 +1286,27 @@
 
     };
 
+    /**
+     * @public
+     * jQuery public function to add a validation rule.
+     *
+     * @example
+     * $.addValidationRule(
+     *     'FILENAME',
+     *     /^[^\\/:\*\?<>\|\"\']*$/,
+     *     '$ has an invalid filename.'
+     * )
+     *
+     * @param {string} name
+     * @param {regex} rule
+     * @param {string} message
+     */
+    $.fn.addValidationRule = $.addValidationRule = function (name, rule, message) {
+
+        return _api.addValidationRule(this, name, rule, message);
+
+    };
+
     // =================================================================================================================
 
     /**
@@ -1786,9 +1765,133 @@
 
             }
 
+        },
+
+        /**
+         * API method to add a validation rule.
+         *
+         * @example
+         * $.addValidationRule(
+         *     'FILENAME',
+         *     /^[^\\/:\*\?<>\|\"\']*$/,
+         *     '$ has an invalid filename.'
+         * )
+         *
+         * @param {object} node
+         * @param {string} name
+         * @param {regex} rule
+         * @param {string} message
+         */
+        addValidationRule: function (node, name, rule, message) {
+
+            if (!name || !rule || !message) {
+                // {debug}
+                window.Debug.log({
+                    'node': node,
+                    'function': '$.addValidationRule(name, rule, message)',
+                    'arguments': JSON.stringify({node: node, rule: rule, message: message}),
+                    'message': 'ERROR - Missing one or multiple parameter(s)'
+                });
+
+                window.Debug.print();
+                // {/debug}
+                return false;
+            }
+
+            rule = _buildRegexFromString(rule);
+
+            if (!(rule instanceof RegExp)) {
+                // {debug}
+                window.Debug.log({
+                    'node': node,
+                    'function': '$.addValidationRule(rule)',
+                    'arguments': rule.toString(),
+                    'message': 'ERROR - Invalid rule'
+                });
+
+                window.Debug.print();
+                // {/debug}
+                return false;
+            }
+
+            name = name.toUpperCase();
+
+            _rules[name] = rule;
+            _messages[name] = message;
+
+            return true;
+
         }
 
     };
+
+    /**
+     * @private
+     * Converts string into a regex
+     *
+     * @param {String|Object} regex
+     * @returns {Object|Boolean} rule
+     */
+    function _buildRegexFromString(regex) {
+
+        if (!regex || (typeof regex !== "string" && !(regex instanceof RegExp))) {
+            _regexDebug();
+            return false;
+        }
+
+        if (typeof regex !== 'string') {
+            regex = regex.toString();
+        }
+
+        var separator = regex.charAt(0),
+            index = regex.length - 1,
+            pattern,
+            modifier,
+            rule;
+
+        while (index > 0) {
+            if (/[gimsxeU]/.test(regex.charAt(index))) {
+                index--;
+            } else {
+                break;
+            }
+        }
+
+        if (regex.charAt(index) !== separator) {
+            separator = null;
+        }
+
+        if (separator && index !== regex.length - 1) {
+            modifier = regex.substr(index + 1, regex.length - 1);
+        }
+
+        if (separator) {
+            pattern = regex.substr(1, index - 1);
+        } else {
+            pattern = regex;
+        }
+
+        try {
+            rule = new RegExp(pattern, modifier);
+        } catch (error) {
+            _regexDebug();
+            return false;
+        }
+
+        return rule;
+
+        function _regexDebug() {
+            // {debug}
+            window.Debug.log({
+                'function': '_buildRegexFromString()',
+                'arguments': '{pattern: {' + (pattern || '') + '}, modifier: {' + (modifier || '') + '}',
+                'message': 'WARNING - Invalid regex given: ' + regex
+            });
+            window.Debug.print();
+            // {/debug}
+        }
+
+    }
 
     // {debug}
     window.Debug = {

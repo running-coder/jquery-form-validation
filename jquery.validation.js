@@ -24,7 +24,7 @@
      * Fail-safe preventExtensions function for older browsers
      */
     if (typeof Object.preventExtensions !== "function") {
-        Object.preventExtensions = function (obj) { return obj; }
+        Object.preventExtensions = function (obj) { return obj; };
     }
 
     // Not using strict to avoid throwing a window error on bad config extend.
@@ -37,37 +37,25 @@
      * RegExp rules
      */
     var _rules = {
-        // Validate not empty
-        NOTEMPTY: /./,
-        // Validate an integer
-        INTEGER: /^\d+$/,
-        // Validate a numeric
-        NUMERIC: /^\d+(?:,\d{3})?(?:\.\d+)?$/,
-        // Validate an alphanumeric string (no special chars)
-        MIXED: /^[\w\s-]+$/,
-        // Validate a spaceless string
-        NOSPACE: /^[^\s]+$/,
-        // Validate a spaceless string at start or end
-        TRIM: /^[^\s].*[^\s]$/,
-        // Validate a date YYYY-MM-DD
-        DATE: /^\d{4}-\d{2}-\d{2}(\s\d{2}:\d{2}(:\d{2})?)?$/,
-        // Validate an email
-        EMAIL: /^([^@]+?)@(([a-z0-9]-*)*[a-z0-9]+\.)+([a-z0-9]+)$/i,
-        // Validate an url
-        URL: /^(https?:\/\/)?((([a-z0-9]-*)*[a-z0-9]+\.?)*([a-z0-9]+))(\/[\w?=\.-]*)*$/,
-        // Validate a north american phone number
-        PHONE: /^(\()?\d{3}(\))?(-|\s)?\d{3}(-|\s)\d{4}$/,
-        // Validate value if it is not empty
-        OPTIONAL: /^.*$/,
-        // Validate values or length by comparison
-        COMPARISON: /^\s*([LV])\s*([<>]=?|==|!=)\s*([^<>=!]+?)\s*$/
-    };
+            NOTEMPTY: /./,
+            INTEGER: /^\d+$/,
+            NUMERIC: /^\d+(?:[,|\s]\d{3})?(?:\.\d+)?$/,
+            MIXED: /^[\w\s-]+$/,
+            NOSPACE: /\s/,
+            TRIM: /^[^\s].*[^\s]$/,
+            DATE: /^\d{4}-\d{2}-\d{2}(\s\d{2}:\d{2}(:\d{2})?)?$/,
+            EMAIL: /^([^@]+?)@(([a-z0-9]-*)*[a-z0-9]+\.)+([a-z0-9]+)$/i,
+            URL: /^(https?:\/\/)?((([a-z0-9]-*)*[a-z0-9]+\.?)*([a-z0-9]+))(\/[\w?=\.-]*)*$/,
+            PHONE: /^(\()?\d{3}(\))?(-|\s)?\d{3}(-|\s)\d{4}$/,
+            OPTIONAL: /^.*$/,
+            COMPARISON: /^\s*([LV])\s*([<>]=?|==|!=)\s*([^<>=!]+?)\s*$/
+        },
 
-    /**
-     * @private
-     * Error messages
-     */
-    var _messages = {
+        /**
+         * @private
+         * Error messages
+         */
+        _messages = {
             'default': '$ contain error(s).',
             'NOTEMPTY': '$ must not be empty.',
             'NUMERIC': '$ must be numeric.',
@@ -80,7 +68,6 @@
             'EMAIL': '$ is not valid.',
             'URL': '$ is not valid.',
             'PHONE': '$ is not a valid phone number.',
-            //'INARRAY': '$ is not a valid option.',
             '<': '$ must be less than % characters.',
             '<=': '$ must be less or equal to % characters.',
             '>': '$ must be greater than % characters.',
@@ -88,94 +75,94 @@
             '==': '$ must be equal to %',
             '!=': '$ must be different than %'
         },
-        _extendedMessages = false;
+        _extendedMessages = false,
 
-    /**
-     * @private
-     * HTML5 data attributes
-     */
-    var _data = {
-        validation: 'data-validation',
-        validationMessage: 'data-validation-message',
-        regex: 'data-validation-regex',
-        regexMessage: 'data-validation-regex-message',
-        group: 'data-validation-group',
-        label: 'data-validation-label',
-        errorList: 'data-error-list'
-    };
+        /**
+         * @private
+         * HTML5 data attributes
+         */
+        _data = {
+            validation: 'data-validation',
+            validationMessage: 'data-validation-message',
+            regex: 'data-validation-regex',
+            regexMessage: 'data-validation-regex-message',
+            group: 'data-validation-group',
+            label: 'data-validation-label',
+            errorList: 'data-error-list'
+        },
 
-    /**
-     * @private
-     * Default options
-     *
-     * @link http://www.runningcoder.org/jqueryvalidation/documentation/
-     */
-    var _options = {
-        submit: {
-            settings: {
-                form: null,
-                display: "inline",
-                insertion: "append",
-                allErrors: false,
-                trigger: "click",
-                button: "[type='submit']",
-                errorClass: "error",
-                errorListClass: "error-list",
-                inputContainer: null,
-                clear: "focusin",
-                scrollToError: false
+        /**
+         * @private
+         * Default options
+         *
+         * @link http://www.runningcoder.org/jqueryvalidation/documentation/
+         */
+        _options = {
+            submit: {
+                settings: {
+                    form: null,
+                    display: "inline",
+                    insertion: "append",
+                    allErrors: false,
+                    trigger: "click",
+                    button: "[type='submit']",
+                    errorClass: "error",
+                    errorListClass: "error-list",
+                    inputContainer: null,
+                    clear: "focusin",
+                    scrollToError: false
+                },
+                callback: {
+                    onInit: null,
+                    onValidate: null,
+                    onError: null,
+                    onBeforeSubmit: null,
+                    onSubmit: null,
+                    onAfterSubmit: null
+                }
             },
-            callback: {
-                onInit: null,
-                onValidate: null,
-                onError: null,
-                onBeforeSubmit: null,
-                onSubmit: null,
-                onAfterSubmit: null
-            }
-        },
-        dynamic: {
-            settings: {
-                trigger: null,
-                delay: 300
+            dynamic: {
+                settings: {
+                    trigger: null,
+                    delay: 300
+                },
+                callback: {
+                    onSuccess: null,
+                    onError: null,
+                    onComplete: null
+                }
             },
-            callback: {
-                onSuccess: null,
-                onError: null,
-                onComplete: null
-            }
+            messages: {},
+            labels: {},
+            debug: false
         },
-        messages: {},
-        labels: {},
-        debug: false
-    };
 
-    /**
-     * @private
-     * Limit the supported options on matching keys
-     */
-    var _supported = {
-        submit: {
-            settings: {
-                display: ["inline", "block"],
-                insertion: ["append", "prepend"], //"before", "insertBefore", "after", "insertAfter"
-                allErrors: [true, false],
-                clear: ["focusin", "keypress", false],
-                trigger: [
-                    "click", "dblclick", "focusout",
-                    "hover", "mousedown", "mouseenter",
-                    "mouseleave", "mousemove", "mouseout",
-                    "mouseover", "mouseup", "toggle"
-                ]
-            }
-        },
-        dynamic: {
-            settings: {
-                trigger: ["focusout", "keydown", "keypress", "keyup"]
-            }
-        },
-        debug: [true, false]
-    };
+        /**
+         * @private
+         * Limit the supported options on matching keys
+         */
+        _supported = {
+            submit: {
+                settings: {
+                    display: ["inline", "block"],
+                    insertion: ["append", "prepend"], //"before", "insertBefore", "after", "insertAfter"
+                    allErrors: [true, false],
+                    clear: ["focusin", "keypress", false],
+                    trigger: [
+                        "click", "dblclick", "focusout",
+                        "hover", "mousedown", "mouseenter",
+                        "mouseleave", "mousemove", "mouseout",
+                        "mouseover", "mouseup", "toggle"
+                    ]
+                }
+            },
+            dynamic: {
+                settings: {
+                    trigger: ["focusout", "keydown", "keypress", "keyup"]
+                }
+            },
+            debug: [true, false]
+        };
 
     // =================================================================================================================
 
@@ -302,7 +289,7 @@
             }
 
             // {debug}
-            if (options.debug && $.inArray(options.debug, _supported['debug'] !== -1)) {
+            if (options.debug && $.inArray(options.debug, _supported.debug !== -1)) {
                 tpmOptions.debug = options.debug;
             }
             // {/debug}
@@ -391,7 +378,7 @@
 
                     });
                 }
-            )
+            );
         }
 
         /**
@@ -621,14 +608,22 @@
 
             // Validate for predefined "data-validation" _rules
             if (_rules[rule]) {
-                if (!_rules[rule].test(value)) {
+                var hasError = false;
+                if (rule === 'NOSPACE') {
+                    if (_rules[rule].test(value)) {
+                        hasError = true;
+                    }
+                } else if (!_rules[rule].test(value)) {
+                    hasError = true;
+                }
+                if (hasError) {
                     throw [options.messages[rule], ''];
                 }
                 return;
             }
 
             // Validate for comparison "data-validation"
-            var comparison = rule.match(_rules['COMPARISON']);
+            var comparison = rule.match(_rules.COMPARISON);
 
             if (!comparison || comparison.length !== 4) {
 
@@ -670,7 +665,7 @@
 
                     } else {
 
-                        if (!value || eval(value.length + operator + parseFloat(compared)) == false) {
+                        if (!value || eval(value.length + operator + parseFloat(compared)) === false) {
                             throw [options.messages[operator], compared];
                         }
 
@@ -805,7 +800,7 @@
                 input.addClass(options.submit.settings.errorClass);
 
                 if (options.submit.settings.inputContainer) {
-                    input.parentsUntil(node, options.submit.settings.inputContainer).addClass(options.submit.settings.errorClass)
+                    input.parentsUntil(node, options.submit.settings.inputContainer).addClass(options.submit.settings.errorClass);
                 }
 
                 inputId = input.attr('id');
@@ -857,7 +852,7 @@
 
                 var event = "coucou" + resetSuffix;
                 if (options.submit.settings.clear) {
-                    event += " " + options.submit.settings.clear + resetSuffix
+                    event += " " + options.submit.settings.clear + resetSuffix;
                 }
                 if (options.dynamic.settings.trigger) {
                     event += " " + options.dynamic.settings.trigger + resetSuffix;
@@ -878,7 +873,7 @@
                         }
                     };
 
-                }(inputName, input, label, errorContainer, group))
+                }(inputName, input, label, errorContainer, group));
             }
 
             if (options.submit.settings.scrollToError && !window.Validation.hasScrolled) {
@@ -903,6 +898,7 @@
         function displayErrors () {
 
             for (var inputName in errors) {
+                if (!errors.hasOwnProperty(inputName)) continue;
                 displayOneError(inputName);
             }
 
@@ -926,7 +922,7 @@
                 //window.Validation.hasScrolled = false;
 
                 if (options.submit.settings.inputContainer) {
-                    (group ? label : input).parentsUntil(node, options.submit.settings.inputContainer).removeClass(options.submit.settings.errorClass)
+                    (group ? label : input).parentsUntil(node, options.submit.settings.inputContainer).removeClass(options.submit.settings.errorClass);
                 }
 
                 label && label.removeClass(options.submit.settings.errorClass);
@@ -1058,7 +1054,7 @@
             return function(callback, ms){
                 clearTimeout (timer);
                 timer = setTimeout(callback, ms);
-            }
+            };
         })();
 
         /**
@@ -1291,19 +1287,26 @@
      * jQuery public function to add a validation rule.
      *
      * @example
-     * $.addValidationRule(
-     *     'FILENAME',
-     *     /^[^\\/:\*\?<>\|\"\']*$/,
-     *     '$ has an invalid filename.'
-     * )
+     * $.addValidationRule({
+     *     rule: 'FILENAME',
+     *     regex: /^[^\\/:\*\?<>\|\"\']*$/,
+     *     message: '$ has an invalid filename.'
+     * })
      *
-     * @param {string} name
-     * @param {regex} rule
-     * @param {string} message
+     * @param {Object|Array} name
      */
-    $.fn.addValidationRule = $.addValidationRule = function (name, rule, message) {
+    $.fn.addValidationRule = $.addValidationRule = function (rules) {
 
-        return _api.addValidationRule(this, name, rule, message);
+        if (!(rules instanceof Array)) {
+            rules = [rules];
+        }
+
+        for (var i=0; i<rules.length; i++) {
+            _api.addValidationRule(rules[i]);
+        }
+
+        console.log(_rules)
+        console.log(_messages)
 
     };
 
@@ -1433,7 +1436,7 @@
                 window.Debug.log({
                     'node': node,
                     'function': '$.validate()',
-                    'arguments': '$("' + node['selector'] + '").validate()',
+                    'arguments': '$("' + node.selector + '").validate()',
                     'message': 'Unable to find jQuery form element - Validation dropped'
                 });
 
@@ -1771,26 +1774,21 @@
          * API method to add a validation rule.
          *
          * @example
-         * $.addValidationRule(
-         *     'FILENAME',
-         *     /^[^\\/:\*\?<>\|\"\']*$/,
-         *     '$ has an invalid filename.'
-         * )
+         * $.addValidationRule({
+         *     rule: 'FILENAME',
+         *     regex: /^[^\\/:\*\?<>\|\"\']*$/,
+         *     message: '$ has an invalid filename.'
+         * })
          *
-         * @param {object} node
-         * @param {string} name
-         * @param {regex} rule
-         * @param {string} message
+         * @param {object} ruleObj
          */
-        addValidationRule: function (node, name, rule, message) {
+        addValidationRule: function (ruleObj) {
 
-            if (!name || !rule || !message) {
+            if (!ruleObj.rule || !ruleObj.regex || !ruleObj.message) {
                 // {debug}
                 window.Debug.log({
-                    'node': node,
-                    'function': '$.addValidationRule(name, rule, message)',
-                    'arguments': JSON.stringify({node: node, rule: rule, message: message}),
-                    'message': 'ERROR - Missing one or multiple parameter(s)'
+                    'function': '$.addValidationRule()',
+                    'message': 'ERROR - Missing one or multiple parameter(s) {rule, regex, message}'
                 });
 
                 window.Debug.print();
@@ -1798,14 +1796,13 @@
                 return false;
             }
 
-            rule = _buildRegexFromString(rule);
+            var regex = _buildRegexFromString(ruleObj.regex);
 
-            if (!(rule instanceof RegExp)) {
+            if (!(regex instanceof RegExp)) {
                 // {debug}
                 window.Debug.log({
-                    'node': node,
                     'function': '$.addValidationRule(rule)',
-                    'arguments': rule.toString(),
+                    'arguments': regex.toString(),
                     'message': 'ERROR - Invalid rule'
                 });
 
@@ -1814,10 +1811,10 @@
                 return false;
             }
 
-            name = name.toUpperCase();
+            ruleObj.rule = ruleObj.rule.toUpperCase();
 
-            _rules[name] = rule;
-            _messages[name] = message;
+            _rules[ruleObj.rule] = regex;
+            _messages[ruleObj.rule] = ruleObj.message;
 
             return true;
 
@@ -1911,7 +1908,7 @@
                         'arguments': ''
                     }
                 ), debugObject
-            )
+            );
 
         },
         print: function () {

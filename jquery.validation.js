@@ -1,10 +1,10 @@
 /**
  * jQuery Form Validation
- * Copyright (C) 2014 RunningCoder.org
+ * Copyright (C) 2015 RunningCoder.org
  * Licensed under the MIT license
  *
  * @author Tom Bertrand
- * @version 1.5.0 (2015-02-03)
+ * @version 1.5.0 (2015-02-08)
  * @link http://www.runningcoder.org/jqueryvalidation/
  *
  * @note
@@ -15,7 +15,6 @@
 
     window.Validation = {
         form: [],
-        messages: null,
         labels: {},
         hasScrolled: false
     };
@@ -37,132 +36,133 @@
      * RegExp rules
      */
     var _rules = {
-            NOTEMPTY: /./,
-            INTEGER: /^\d+$/,
-            NUMERIC: /^\d+(?:[,|\s]\d{3})?(?:\.\d+)?$/,
-            MIXED: /^[\w\s-]+$/,
-            NOSPACE: /\s/,
-            TRIM: /^[^\s].*[^\s]$/,
-            DATE: /^\d{4}-\d{2}-\d{2}(\s\d{2}:\d{2}(:\d{2})?)?$/,
-            EMAIL: /^([^@]+?)@(([a-z0-9]-*)*[a-z0-9]+\.)+([a-z0-9]+)$/i,
-            URL: /^(https?:\/\/)?((([a-z0-9]-*)*[a-z0-9]+\.?)*([a-z0-9]+))(\/[\w?=\.-]*)*$/,
-            PHONE: /^(\()?\d{3}(\))?(-|\s)?\d{3}(-|\s)\d{4}$/,
-            OPTIONAL: /^.*$/,
-            COMPARISON: /^\s*([LV])\s*([<>]=?|==|!=)\s*([^<>=!]+?)\s*$/
-        },
+        NOTEMPTY: /./,
+        INTEGER: /^\d+$/,
+        NUMERIC: /^\d+(?:[,|\s]\d{3})?(?:\.\d+)?$/,
+        MIXED: /^[\w\s-]+$/,
+        NOSPACE: /^(?!\s)\S*$/,
+        TRIM: /^[^\s].*[^\s]$/,
+        DATE: /^\d{4}-\d{2}-\d{2}(\s\d{2}:\d{2}(:\d{2})?)?$/,
+        EMAIL: /^([^@]+?)@(([a-z0-9]-*)*[a-z0-9]+\.)+([a-z0-9]+)$/i,
+        URL: /^(https?:\/\/)?((([a-z0-9]-*)*[a-z0-9]+\.?)*([a-z0-9]+))(\/[\w?=\.-]*)*$/,
+        PHONE: /^(\()?\d{3}(\))?(-|\s)?\d{3}(-|\s)\d{4}$/,
+        OPTIONAL: /^.*$/,
+        COMPARISON: /^\s*([LV])\s*([<>]=?|==|!=)\s*([^<>=!]+?)\s*$/
+    },
 
-        /**
-         * @private
-         * Error messages
-         */
-        _messages = {
-            'default': '$ contain error(s).',
-            'NOTEMPTY': '$ must not be empty.',
-            'NUMERIC': '$ must be numeric.',
-            'INTEGER': '$ must be an integer.',
-            'STRING': '$ must be a string.',
-            'NOSPACE': '$ must not contain spaces.',
-            'TRIM': '$ must not start or end with space character.',
-            'MIXED': '$ must be letters or numbers (no special characters).',
-            'DATE': '$ is not a valid with format YYYY-MM-DD.',
-            'EMAIL': '$ is not valid.',
-            'URL': '$ is not valid.',
-            'PHONE': '$ is not a valid phone number.',
-            '<': '$ must be less than % characters.',
-            '<=': '$ must be less or equal to % characters.',
-            '>': '$ must be greater than % characters.',
-            '>=': '$ must be greater or equal to % characters.',
-            '==': '$ must be equal to %',
-            '!=': '$ must be different than %'
-        },
-        _extendedMessages = false,
+    /**
+     * @private
+     * Error messages
+     */
+    _messages = {
+        'default': '$ contain error(s).',
+        'NOTEMPTY': '$ must not be empty.',
+        'NUMERIC': '$ must be numeric.',
+        'INTEGER': '$ must be an integer.',
+        'STRING': '$ must be a string.',
+        'NOSPACE': '$ must not contain spaces.',
+        'TRIM': '$ must not start or end with space character.',
+        'MIXED': '$ must be letters or numbers (no special characters).',
+        'DATE': '$ is not a valid with format YYYY-MM-DD.',
+        'EMAIL': '$ is not valid.',
+        'URL': '$ is not valid.',
+        'PHONE': '$ is not a valid phone number.',
+        '<': '$ must be less than % characters.',
+        '<=': '$ must be less or equal to % characters.',
+        '>': '$ must be greater than % characters.',
+        '>=': '$ must be greater or equal to % characters.',
+        '==': '$ must be equal to %',
+        '!=': '$ must be different than %'
+    },
 
-        /**
-         * @private
-         * HTML5 data attributes
-         */
-        _data = {
-            validation: 'data-validation',
-            validationMessage: 'data-validation-message',
-            regex: 'data-validation-regex',
-            regexMessage: 'data-validation-regex-message',
-            group: 'data-validation-group',
-            label: 'data-validation-label',
-            errorList: 'data-error-list'
-        },
+    /**
+     * @private
+     * HTML5 data attributes
+     */
+    _data = {
+        validation: 'data-validation',
+        validationMessage: 'data-validation-message',
+        regex: 'data-validation-regex',
+        regexReverse: 'data-validation-regex-reverse',
+        regexMessage: 'data-validation-regex-message',
+        group: 'data-validation-group',
+        label: 'data-validation-label',
+        errorList: 'data-error-list'
+    },
 
-        /**
-         * @private
-         * Default options
-         *
-         * @link http://www.runningcoder.org/jqueryvalidation/documentation/
-         */
-        _options = {
-            submit: {
-                settings: {
-                    form: null,
-                    display: "inline",
-                    insertion: "append",
-                    allErrors: false,
-                    trigger: "click",
-                    button: "[type='submit']",
-                    errorClass: "error",
-                    errorListClass: "error-list",
-                    inputContainer: null,
-                    clear: "focusin",
-                    scrollToError: false
-                },
-                callback: {
-                    onInit: null,
-                    onValidate: null,
-                    onError: null,
-                    onBeforeSubmit: null,
-                    onSubmit: null,
-                    onAfterSubmit: null
-                }
+    /**
+     * @private
+     * Default options
+     *
+     * @link http://www.runningcoder.org/jqueryvalidation/documentation/
+     */
+    _options = {
+        submit: {
+            settings: {
+                form: null,
+                display: "inline",
+                insertion: "append",
+                allErrors: false,
+                trigger: "click",
+                button: "[type='submit']",
+                errorClass: "error",
+                errorListClass: "error-list",
+                inputContainer: null,
+                clear: "focusin",
+                scrollToError: false
             },
-            dynamic: {
-                settings: {
-                    trigger: null,
-                    delay: 300
-                },
-                callback: {
-                    onSuccess: null,
-                    onError: null,
-                    onComplete: null
-                }
-            },
-            messages: {},
-            labels: {},
-            debug: false
+            callback: {
+                onInit: null,
+                onValidate: null,
+                onError: null,
+                onBeforeSubmit: null,
+                onSubmit: null,
+                onAfterSubmit: null
+            }
         },
+        dynamic: {
+            settings: {
+                trigger: null,
+                delay: 300
+            },
+            callback: {
+                onSuccess: null,
+                onError: null,
+                onComplete: null
+            }
+        },
+        rules: {},
+        messages: {},
+        labels: {},
+        debug: false
+    },
 
-        /**
-         * @private
-         * Limit the supported options on matching keys
-         */
-        _supported = {
-            submit: {
-                settings: {
-                    display: ["inline", "block"],
-                    insertion: ["append", "prepend"], //"before", "insertBefore", "after", "insertAfter"
-                    allErrors: [true, false],
-                    clear: ["focusin", "keypress", false],
-                    trigger: [
-                        "click", "dblclick", "focusout",
-                        "hover", "mousedown", "mouseenter",
-                        "mouseleave", "mousemove", "mouseout",
-                        "mouseover", "mouseup", "toggle"
-                    ]
-                }
-            },
-            dynamic: {
-                settings: {
-                    trigger: ["focusout", "keydown", "keypress", "keyup"]
-                }
-            },
-            debug: [true, false]
-        };
+    /**
+     * @private
+     * Limit the supported options on matching keys
+     */
+    _supported = {
+        submit: {
+            settings: {
+                display: ["inline", "block"],
+                insertion: ["append", "prepend"], //"before", "insertBefore", "after", "insertAfter"
+                allErrors: [true, false],
+                clear: ["focusin", "keypress", false],
+                trigger: [
+                    "click", "dblclick", "focusout",
+                    "hover", "mousedown", "mouseenter",
+                    "mouseleave", "mousemove", "mouseout",
+                    "mouseover", "mouseup", "toggle"
+                ]
+            }
+        },
+        dynamic: {
+            settings: {
+                trigger: ["focusout", "keydown", "keypress", "keyup"]
+            }
+        },
+        debug: [true, false]
+    };
 
     // =================================================================================================================
 
@@ -176,26 +176,34 @@
     var Validation = function (node, options) {
 
         var errors = [],
+            messages = {},
             delegateSuffix = ".vd", // validation.delegate
             resetSuffix = ".vr";    // validation.resetError
 
         window.Validation.hasScrolled = false;
 
         /**
-         * Extends user-defined "message" into the default Validation "_message".
-         * Notes:
-         *  - preventExtensions prevents from modifying the Validation "_message" object structure
+         * Extends user-defined "options.message" into the default Validation "_message".
+         */
+        function extendRules () {
+            options.rules = $.extend(
+                true,
+                {},
+                _rules,
+                options.rules
+            );
+        }
+
+        /**
+         * Extends user-defined "options.message" into the default Validation "_message".
          */
         function extendMessages () {
-
-            if (!window.Validation.messages || _extendedMessages) {
-                return false;
-            }
-
-            _messages = $.extend(_messages, window.Validation.messages);
-
-            _extendedMessages = true;
-
+            options.messages = $.extend(
+                true,
+                {},
+                _messages,
+                options.messages
+            );
         }
 
         /**
@@ -210,18 +218,15 @@
                 options = {};
             }
 
-            var tpmOptions = Object.preventExtensions($.extend(true, {}, _options)),
-                tmpMessages = Object.preventExtensions($.extend(true, {}, _messages));
-
-            tpmOptions.messages = $.extend(tmpMessages, options.messages || {});
+            var tpmOptions = Object.preventExtensions($.extend(true, {}, _options));
 
             for (var method in options) {
 
-                if (!options.hasOwnProperty(method) || method === "debug" || method === "messages") {
+                if (!options.hasOwnProperty(method) || method === "debug") {
                     continue;
                 }
 
-                if (method === "labels" && options[method] instanceof Object) {
+                if (~["labels", "messages", "rules"].indexOf(method) && options[method] instanceof Object) {
                     tpmOptions[method] = options[method];
                     continue;
                 }
@@ -416,7 +421,7 @@
             }
 
             node.on("submit", false);
-            node.find(options.submit.settings.button).unbind(event).on(event, function (e) {
+            node.find(options.submit.settings.button).off('.vd').on(event, function (e) {
 
                 e.preventDefault();
 
@@ -462,17 +467,11 @@
             var isValid = true;
 
             $.each(
-                node.find('[' + _data.validation + ']:not([readonly], [disabled]),[' + _data.regex + ']:not([readonly], [disabled])'),
+                node.find('[' + _data.validation + ']:not([disabled]),[' + _data.regex + ']:not([disabled])'),
                 function (index, input) {
-
-                    if ($(this).is(':disabled')) {
-                        return false;
-                    }
-
                     if (!validateInput(input)) {
                         isValid = false;
                     }
-
                 }
             );
 
@@ -517,6 +516,7 @@
                 validationArray = $(input).attr(_data.validation),
                 validationMessage = $(input).attr(_data.validationMessage),
                 validationRegex = $(input).attr(_data.regex),
+                validationRegexReverse = !($(input).attr(_data.regexReverse) === undefined),
                 validationRegexMessage = $(input).attr(_data.regexMessage),
 
                 validateOnce = false;
@@ -571,7 +571,7 @@
 
                 try {
 
-                    validateRule(value, rule);
+                    validateRule(value, rule, validationRegexReverse);
 
                 } catch (error) {
 
@@ -593,37 +593,35 @@
          *
          * @param {string} value
          * @param rule
+         * @param {boolean} [reversed]
          *
          * @returns {*} Error if a mismatch occurred.
          */
-        function validateRule (value, rule) {
+        function validateRule (value, rule, reversed) {
 
-            // Validate for custom "data-validation-regex"
+            // Validate for "data-validation-regex" and "data-validation-regex-reverse"
             if (rule instanceof RegExp) {
-                if (rule.test(value)) {
+                var isValid = rule.test(value);
+
+                if (reversed) {
+                    isValid = !isValid;
+                }
+
+                if (!isValid) {
                     throw [options.messages['default'], ''];
                 }
                 return;
             }
 
-            // Validate for predefined "data-validation" _rules
-            if (_rules[rule]) {
-                var hasError = false;
-                if (rule === 'NOSPACE') {
-                    if (_rules[rule].test(value)) {
-                        hasError = true;
-                    }
-                } else if (!_rules[rule].test(value)) {
-                    hasError = true;
-                }
-                if (hasError) {
+            if (options.rules[rule]) {
+                if (!options.rules[rule].test(value)) {
                     throw [options.messages[rule], ''];
                 }
                 return;
             }
 
             // Validate for comparison "data-validation"
-            var comparison = rule.match(_rules.COMPARISON);
+            var comparison = rule.match(options.rules.COMPARISON);
 
             if (!comparison || comparison.length !== 4) {
 
@@ -984,30 +982,18 @@
         }
 
         /**
-         * Submits the form once it succeeded the validation process.
-         * Note:
-         * - This function will be overridden if "options.submit.settings.onSubmit" is defined
-         * - The node can't be submitted by jQuery since it has been disabled, use the form native submit function instead
+         * Destroy the Validation instance
          *
          * @returns {boolean}
          */
         function destroy () {
 
-            var event = options.submit.settings.trigger + delegateSuffix;
+            resetErrors();
+            node.find('[' + _data.validation + '],[' + _data.regex + ']').off(delegateSuffix + ' ' + resetSuffix);
 
-            if (options.dynamic.settings.trigger) {
-                event += " " + options.dynamic.settings.trigger + delegateSuffix;
-                if (options.dynamic.settings.trigger !== "focusout") {
-                    event += " change" + delegateSuffix + " paste" + delegateSuffix;
-                }
-            }
-
-            $.each(
-                node.find('[' + _data.validation + '],[' + _data.regex + ']'),
-                function (i, v) {
-                    $(v).unbind(event);
-                }
-            );
+            node.find(options.submit.settings.button).off(delegateSuffix).on('click' + delegateSuffix, function () {
+                $(this).closest('form')[0].submit();
+            });
 
             //delete window.Validation.form[node.selector];
 
@@ -1143,8 +1129,9 @@
          */
         this.__construct = function () {
 
-            extendMessages();
             extendOptions();
+            extendRules();
+            extendMessages();
 
             delegateDynamicValidation();
             delegateValidation();
@@ -1287,7 +1274,7 @@
      * jQuery public function to add a validation rule.
      *
      * @example
-     * $.addValidationRule({
+     * $.alterValidationRules({
      *     rule: 'FILENAME',
      *     regex: /^[^\\/:\*\?<>\|\"\']*$/,
      *     message: '$ has an invalid filename.'
@@ -1295,18 +1282,15 @@
      *
      * @param {Object|Array} name
      */
-    $.fn.addValidationRule = $.addValidationRule = function (rules) {
+    $.fn.alterValidationRules = $.alterValidationRules = function (rules) {
 
         if (!(rules instanceof Array)) {
             rules = [rules];
         }
 
         for (var i=0; i<rules.length; i++) {
-            _api.addValidationRule(rules[i]);
+            _api.alterValidationRules(rules[i]);
         }
-
-        console.log(_rules)
-        console.log(_messages)
 
     };
 
@@ -1774,7 +1758,7 @@
          * API method to add a validation rule.
          *
          * @example
-         * $.addValidationRule({
+         * $.alterValidationRules({
          *     rule: 'FILENAME',
          *     regex: /^[^\\/:\*\?<>\|\"\']*$/,
          *     message: '$ has an invalid filename.'
@@ -1782,30 +1766,14 @@
          *
          * @param {object} ruleObj
          */
-        addValidationRule: function (ruleObj) {
+        alterValidationRules: function (ruleObj) {
 
-            if (!ruleObj.rule || !ruleObj.regex || !ruleObj.message) {
+            if (!ruleObj.rule || (!ruleObj.regex && !ruleObj.message)) {
                 // {debug}
                 window.Debug.log({
-                    'function': '$.addValidationRule()',
+                    'function': '$.alterValidationRules()',
                     'message': 'ERROR - Missing one or multiple parameter(s) {rule, regex, message}'
                 });
-
-                window.Debug.print();
-                // {/debug}
-                return false;
-            }
-
-            var regex = _buildRegexFromString(ruleObj.regex);
-
-            if (!(regex instanceof RegExp)) {
-                // {debug}
-                window.Debug.log({
-                    'function': '$.addValidationRule(rule)',
-                    'arguments': regex.toString(),
-                    'message': 'ERROR - Invalid rule'
-                });
-
                 window.Debug.print();
                 // {/debug}
                 return false;
@@ -1813,11 +1781,30 @@
 
             ruleObj.rule = ruleObj.rule.toUpperCase();
 
-            _rules[ruleObj.rule] = regex;
-            _messages[ruleObj.rule] = ruleObj.message;
+            if (ruleObj.regex) {
+
+                var regex = _buildRegexFromString(ruleObj.regex);
+
+                if (!(regex instanceof RegExp)) {
+                    // {debug}
+                    window.Debug.log({
+                        'function': '$.alterValidationRules(rule)',
+                        'arguments': regex.toString(),
+                        'message': 'ERROR - Invalid rule'
+                    });
+                    window.Debug.print();
+                    // {/debug}
+                    return false;
+                }
+
+                _rules[ruleObj.rule] = regex;
+            }
+
+            if (ruleObj.message) {
+                _messages[ruleObj.rule] = ruleObj.message;
+            }
 
             return true;
-
         }
 
     };
@@ -1946,39 +1933,59 @@
         return this.charAt(0).toUpperCase() + this.slice(1);
     };
 
-    /**
-     * Creates a String from a JSON object
-     *
-     * @return {string|array} str String or array of strings
-     */
-    window.JSON.stringify = JSON.stringify || function (obj) {
-        var t = typeof (obj);
-        if (t !== "object" || obj === null) {
-            // simple data type
-            if (t === "string") {
-                obj = '"' + obj + '"';
+    if (!Array.prototype.indexOf)
+    {
+        Array.prototype.indexOf = function(elt /*, from*/)
+        {
+            var len = this.length >>> 0;
+
+            var from = Number(arguments[1]) || 0;
+            from = (from < 0)
+                ? Math.ceil(from)
+                : Math.floor(from);
+            if (from < 0)
+                from += len;
+
+            for (; from < len; from++)
+            {
+                if (from in this &&
+                    this[from] === elt)
+                    return from;
             }
-            return String(obj);
-        }
-        else {
-            // recurse array or object
-            var n, v, json = [], arr = (obj && obj.constructor === Array);
-            for (n in obj) {
-                // jslint hack to validate for..in
-                if (true) {
-                    v = obj[n];
-                    t = typeof(v);
-                    if (t === "string") {
-                        v = '"' + v + '"';
-                    }
-                    else if (t === "object" && v !== null) {
-                        v = JSON.stringify(v);
-                    }
-                    json.push((arr ? "" : '"' + n + '": ') + String(v));
+            return -1;
+        };
+    }
+
+    // {debug}
+    if (!JSON && !JSON.stringify) {
+        JSON.stringify = function (obj) {
+            var t = typeof (obj);
+            if (t !== "object" || obj === null) {
+                // simple data type
+                if (t === "string") {
+                    obj = '"' + obj + '"';
                 }
+                return String(obj);
             }
-            return (arr ? "[" : "{") + String(json) + (arr ? "]" : "}");
-        }
-    };
+            else {
+                var n, v, json = [], arr = (obj && obj.constructor === Array);
+                for (n in obj) {
+                    if (true) {
+                        v = obj[n];
+                        t = typeof(v);
+                        if (t === "string") {
+                            v = '"' + v + '"';
+                        }
+                        else if (t === "object" && v !== null) {
+                            v = JSON.stringify(v);
+                        }
+                        json.push((arr ? "" : '"' + n + '": ') + String(v));
+                    }
+                }
+                return (arr ? "[" : "{") + String(json) + (arr ? "]" : "}");
+            }
+        };
+    }
+    // {/debug}
 
 }(window, document, window.jQuery));

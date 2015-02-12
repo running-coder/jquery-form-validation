@@ -38,7 +38,7 @@
     var _rules = {
         NOTEMPTY: /./,
         INTEGER: /^\d+$/,
-        NUMERIC: /^\d+(?:[,|\s]\d{3})?(?:\.\d+)?$/,
+        NUMERIC: /^\d+(?:[\s,]\d{3})*(?:\.\d+)?$/,
         MIXED: /^[\w\s-]+$/,
         NOSPACE: /^(?!\s)\S*$/,
         TRIM: /^[^\s].*[^\s]$/,

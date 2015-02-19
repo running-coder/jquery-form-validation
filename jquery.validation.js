@@ -36,17 +36,17 @@
      * RegExp rules
      */
     var _rules = {
-        NOTEMPTY: /./,
+        NOTEMPTY: /\S/,
         INTEGER: /^\d+$/,
         NUMERIC: /^\d+(?:[,|\s]\d{3})?(?:\.\d+)?$/,
-        MIXED: /^[\w\s-]+$/,
+        MIXED: /^['\w\s-]+$/,
         NOSPACE: /^(?!\s)\S*$/,
         TRIM: /^[^\s].*[^\s]$/,
         DATE: /^\d{4}-\d{2}-\d{2}(\s\d{2}:\d{2}(:\d{2})?)?$/,
         EMAIL: /^([^@]+?)@(([a-z0-9]-*)*[a-z0-9]+\.)+([a-z0-9]+)$/i,
         URL: /^(https?:\/\/)?((([a-z0-9]-*)*[a-z0-9]+\.?)*([a-z0-9]+))(\/[\w?=\.-]*)*$/,
         PHONE: /^(\()?\d{3}(\))?(-|\s)?\d{3}(-|\s)\d{4}$/,
-        OPTIONAL: /^.*$/,
+        OPTIONAL: /\S/,
         COMPARISON: /^\s*([LV])\s*([<>]=?|==|!=)\s*([^<>=!]+?)\s*$/
     },
 

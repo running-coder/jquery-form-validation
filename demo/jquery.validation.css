@@ -372,7 +372,8 @@ div.error,
 div.error-list,
 label.error,
 input.error,
-select.error {
+select.error,
+textarea.error {
     color: #D95C5C !important;
     border-color: #D95C5C !important;
 }

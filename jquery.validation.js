@@ -4,7 +4,7 @@
  * Licensed under the MIT license
  *
  * @author Tom Bertrand
- * @version 1.5.1 (2015-02-16)
+ * @version 1.5.2 (2015-02-18)
  * @link http://www.runningcoder.org/jqueryvalidation/
  *
  * @note
@@ -41,7 +41,7 @@
         INTEGER: /^\d+$/,
         NUMERIC: /^\d+(?:[,\s]\d{3})*(?:\.\d+)?$/,
         MIXED: /^[\w\s-]+$/,
-        NAME: /^['a-z\s-]+$/i,
+        NAME: /^['a-zãàáäâẽèéëêìíïîõòóöôùúüûñç\s-]+$/i,
         NOSPACE: /^(?!\s)\S*$/,
         TRIM: /^[^\s].*[^\s]$/,
         DATE: /^\d{4}-\d{2}-\d{2}(\s\d{2}:\d{2}(:\d{2})?)?$/,

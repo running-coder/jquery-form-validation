@@ -1,0 +1,33 @@
+{
+    "name": "html5-form-validation",
+    "main": "jquery.validation.min.js",
+    "description": "jQuery plugin that provides a client site form validation with builtin options and deep customization.",
+    "keywords": [
+        "form",
+        "html5",
+        "validate",
+        "validation",
+        "input"
+    ],
+    "version": "1.5.2",
+    "author": {
+        "name": "Tom Bertrand",
+        "url": "http://www.runningcoder.org/jqueryvalidation/"
+    },
+    "licenses": "MIT",
+    "ignore": [
+        "demo",
+        "bower.json",
+        "html5-form-validation.jquery.json",
+        "LICENSE",
+        "README.md"
+    ],
+    "homepage": "http://www.runningcoder.org/jqueryvalidation/",
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/running-coder/jquery-form-validation.git"
+    },
+    "dependencies": {
+        "jquery": ">=1.7.2"
+    }
+}

@@ -15,13 +15,6 @@
     ],
     "licenses": "MIT",
     "homepage": "http://www.runningcoder.org/jqueryvalidation/",
-    "ignore": [
-        "demo/*",
-        "*.json",
-        "html5-form-validation.jquery.json",
-        "LICENSE",
-        "README.md"
-    ],
     "repository": {
         "type": "git",
         "url": "git://github.com/running-coder/jquery-form-validation.git"

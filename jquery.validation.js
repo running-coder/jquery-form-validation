@@ -4,7 +4,7 @@
  * Licensed under the MIT license
  *
  * @author Tom Bertrand
- * @version 1.5.2 (2015-02-18)
+ * @version 1.5.3 (2015-03-17)
  * @link http://www.runningcoder.org/jqueryvalidation/
  *
  * @note
@@ -109,6 +109,7 @@
                 button: "[type='submit']",
                 errorClass: "error",
                 errorListClass: "error-list",
+                errorListContainer: null,
                 inputContainer: null,
                 clear: "focusin",
                 scrollToError: false
@@ -433,10 +434,8 @@
 
                 if (!validateForm()) {
 
-                    // OnError function receives the "errors" object as the last "extraParam"
-                    _executeCallback(options.submit.callback.onError, [node, errors]);
-
                     displayErrors();
+                    _executeCallback(options.submit.callback.onError, [node, errors]);
 
                 } else {
 
@@ -469,7 +468,7 @@
             var isValid = true;
 
             $.each(
-                node.find('[' + _data.validation + ']:not([disabled],[readonly]),[' + _data.regex + ']:not([disabled],[readonly])'),
+                node.find('[' + _data.validation + ']:not([disabled]),[' + _data.regex + ']:not([disabled])'),
                 function (index, input) {
                     if (!validateInput(input)) {
                         isValid = false;
@@ -820,7 +819,11 @@
             }
 
             if (options.submit.settings.display === 'inline') {
-                errorContainer = errorContainer || input.parent();
+                if (options.submit.settings.errorListContainer) {
+                    errorContainer = input.parentsUntil(node, options.submit.settings.errorListContainer);
+                } else {
+                    errorContainer = errorContainer || input.parent();
+                }
             } else if (options.submit.settings.display === 'block') {
                 errorContainer = node;
             }

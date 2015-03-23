@@ -530,7 +530,7 @@
             if (validationArray instanceof Array && validationArray.length > 0) {
 
                 // "OPTIONAL" input will not be validated if it's empty
-                if (value === '' && ~validationArray.indexOf('OPTIONAL')) {
+                if ($.trim(value) === '' && ~validationArray.indexOf('OPTIONAL')) {
                     return true;
                 }
 

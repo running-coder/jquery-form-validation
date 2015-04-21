@@ -861,10 +861,13 @@
                 var event = "coucou" + resetSuffix;
                 if (options.submit.settings.clear) {
                     event += " " + options.submit.settings.clear + resetSuffix;
+                    if (~['radio', 'checkbox'].indexOf(input[0].type)) {
+                        event += " change" + resetSuffix;
+                    }
                 }
                 if (options.dynamic.settings.trigger) {
                     event += " " + options.dynamic.settings.trigger + resetSuffix;
-                    if (options.dynamic.settings.trigger !== "focusout") {
+                    if (options.dynamic.settings.trigger !== "focusout" && !~['radio', 'checkbox'].indexOf(input[0].type)) {
                         event += " change" + resetSuffix + " paste" + resetSuffix;
                     }
                 }

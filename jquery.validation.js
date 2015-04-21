@@ -180,6 +180,7 @@
 
         var errors = [],
             messages = {},
+            formData = {},
             delegateSuffix = ".vd", // validation.delegate
             resetSuffix = ".vr";    // validation.resetError
 
@@ -435,13 +436,13 @@
                 if (!validateForm()) {
 
                     displayErrors();
-                    _executeCallback(options.submit.callback.onError, [node, errors]);
+                    _executeCallback(options.submit.callback.onError, [node, errors, formData]);
 
                 } else {
 
                     _executeCallback(options.submit.callback.onBeforeSubmit, [node]);
 
-                    (options.submit.callback.onSubmit) ? _executeCallback(options.submit.callback.onSubmit, [node]) : submitForm();
+                    (options.submit.callback.onSubmit) ? _executeCallback(options.submit.callback.onSubmit, [node, formData]) : submitForm();
 
                     _executeCallback(options.submit.callback.onAfterSubmit, [node]);
 
@@ -466,6 +467,8 @@
         function validateForm() {
 
             var isValid = true;
+
+            formData = {};
 
             $.each(
                 node.find('[' + _data.validation + ']:not([disabled]),[' + _data.regex + ']:not([disabled])'),
@@ -583,6 +586,8 @@
                 }
 
             }
+
+            formData[inputName] = value;
 
             return !errors[inputName] || errors[inputName] instanceof Array && errors[inputName].length === 0;
 

@@ -1,15 +1,12 @@
-/**
+/*!
  * jQuery Form Validation
  * Copyright (C) 2015 RunningCoder.org
  * Licensed under the MIT license
  *
  * @author Tom Bertrand
- * @version 1.5.3 (2015-03-17)
+ * @version 2.0.0 (2015-04-22)
  * @link http://www.runningcoder.org/jqueryvalidation/
- *
- * @note
- * Remove debug code: //\s?\{debug\}[\s\S]*?\{/debug\}
- */
+*/
 ;(function (window, document, $, undefined) {
 
     window.Validation = {
@@ -18,24 +15,13 @@
         hasScrolled: false
     };
 
-    /**
-     * Fail-safe preventExtensions function for older browsers
-     */
+    
     if (typeof Object.preventExtensions !== "function") {
         Object.preventExtensions = function (obj) {
             return obj;
         };
     }
-
-    // Not using strict to avoid throwing a window error on bad config extend.
-    // console.debug is used instead to debug Validation
-    //"use strict";
-
-    // =================================================================================================================
-    /**
-     * @private
-     * RegExp rules
-     */
+    
     var _rules = {
         NOTEMPTY: /\S/,
         INTEGER: /^\d+$/,
@@ -52,10 +38,7 @@
         COMPARISON: /^\s*([LV])\s*([<>]=?|==|!=)\s*([^<>=!]+?)\s*$/
     },
 
-    /**
-     * @private
-     * Error messages
-     */
+    
     _messages = {
         'default': '$ contain error(s).',
         'NOTEMPTY': '$ must not be empty.',
@@ -77,10 +60,7 @@
         '!=': '$ must be different than %'
     },
 
-    /**
-     * @private
-     * HTML5 data attributes
-     */
+    
     _data = {
         validation: 'data-validation',
         validationMessage: 'data-validation-message',
@@ -92,12 +72,7 @@
         errorList: 'data-error-list'
     },
 
-    /**
-     * @private
-     * Default options
-     *
-     * @link http://www.runningcoder.org/jqueryvalidation/documentation/
-     */
+    
     _options = {
         submit: {
             settings: {
@@ -140,10 +115,7 @@
         debug: false
     },
 
-    /**
-     * @private
-     * Limit the supported options on matching keys
-     */
+    
     _supported = {
         submit: {
             settings: {
@@ -167,15 +139,7 @@
         debug: [true, false]
     };
 
-    // =================================================================================================================
-
-    /**
-     * @constructor
-     * Validation Class
-     *
-     * @param {object} node jQuery form object
-     * @param {object} options User defined options
-     */
+    
     var Validation = function (node, options) {
 
         var errors = [],
@@ -186,9 +150,7 @@
 
         window.Validation.hasScrolled = false;
 
-        /**
-         * Extends user-defined "options.message" into the default Validation "_message".
-         */
+        
         function extendRules() {
             options.rules = $.extend(
                 true,
@@ -198,9 +160,7 @@
             );
         }
 
-        /**
-         * Extends user-defined "options.message" into the default Validation "_message".
-         */
+        
         function extendMessages() {
             options.messages = $.extend(
                 true,
@@ -210,12 +170,7 @@
             );
         }
 
-        /**
-         * Extends user-defined "options" into the default Validation "_options".
-         * Notes:
-         *  - preventExtensions prevents from modifying the Validation "_options" object structure
-         *  - filter through the "_supported" to delete unsupported "options"
-         */
+        
         function extendOptions() {
 
             if (!(options instanceof Object)) {
@@ -236,15 +191,12 @@
                 }
 
                 if (!_options[method] || !(options[method] instanceof Object)) {
-
-                    // {debug}
                     options.debug && window.Debug.log({
                         'node': node,
                         'function': 'extendOptions()',
                         'arguments': '{' + method + ': ' + JSON.stringify(options[method]) + '}',
                         'message': 'WARNING - ' + method + ' - invalid option'
                     });
-                    // {/debug}
 
                     continue;
                 }
@@ -255,15 +207,12 @@
                     }
 
                     if (!_options[method][type] || !(options[method][type] instanceof Object)) {
-
-                        // {debug}
                         options.debug && window.Debug.log({
                             'node': node,
                             'function': 'extendOptions()',
                             'arguments': '{' + type + ': ' + JSON.stringify(options[method][type]) + '}',
                             'message': 'WARNING - ' + type + ' - invalid option'
                         });
-                        // {/debug}
 
                         continue;
                     }
@@ -277,15 +226,12 @@
                             _supported[method][type] &&
                             _supported[method][type][option] &&
                             $.inArray(options[method][type][option], _supported[method][type][option]) === -1) {
-
-                            // {debug}
                             options.debug && window.Debug.log({
                                 'node': node,
                                 'function': 'extendOptions()',
                                 'arguments': '{' + option + ': ' + JSON.stringify(options[method][type][option]) + '}',
                                 'message': 'WARNING - ' + option.toString() + ': ' + JSON.stringify(options[method][type][option]) + ' - unsupported option'
                             });
-                            // {/debug}
 
                             delete options[method][type][option];
                         }
@@ -296,14 +242,9 @@
                     }
                 }
             }
-
-            // {debug}
             if (options.debug && $.inArray(options.debug, _supported.debug !== -1)) {
                 tpmOptions.debug = options.debug;
             }
-            // {/debug}
-
-            // @TODO Would there be a better fix to solve event conflict?
             if (tpmOptions.dynamic.settings.trigger) {
                 if (tpmOptions.dynamic.settings.trigger === "keypress" && tpmOptions.submit.settings.clear === "keypress") {
                     tpmOptions.dynamic.settings.trigger = "keydown";
@@ -314,36 +255,26 @@
 
         }
 
-        /**
-         * Delegates the dynamic validation on data-validation and data-validation-regex attributes based on trigger.
-         *
-         * @returns {boolean} false if the option is not set
-         */
+        
         function delegateDynamicValidation() {
 
             if (!options.dynamic.settings.trigger) {
                 return false;
             }
-
-            // {debug}
             options.debug && window.Debug.log({
                 'node': node,
                 'function': 'delegateDynamicValidation()',
                 'arguments': JSON.stringify(options),
                 'message': 'OK - Dynamic Validation activated on ' + node.length + ' form(s)'
             });
-            // {/debug}
 
             if (!node.find('[' + _data.validation + '],[' + _data.regex + ']')[0]) {
-
-                // {debug}
                 options.debug && window.Debug.log({
                     'node': node,
                     'function': 'delegateDynamicValidation()',
                     'arguments': 'node.find([' + _data.validation + '],[' + _data.regex + '])',
                     'message': 'ERROR - [' + _data.validation + '] not found'
                 });
-                // {/debug}
 
                 return false;
             }
@@ -362,8 +293,6 @@
                         if ($(this).is(':disabled')) {
                             return false;
                         }
-
-                        //e.preventDefault();
 
                         var input = this,
                             keyCode = e.keyCode || null;
@@ -390,35 +319,26 @@
             );
         }
 
-        /**
-         * Delegates the submit validation on data-validation and data-validation-regex attributes based on trigger.
-         * Note: Disable the form submit function so the callbacks are not by-passed
-         */
+        
         function delegateValidation() {
 
             _executeCallback(options.submit.callback.onInit, [node]);
 
             var event = options.submit.settings.trigger + '.vd';
-
-            // {debug}
             options.debug && window.Debug.log({
                 'node': node,
                 'function': 'delegateValidation()',
                 'arguments': JSON.stringify(options),
                 'message': 'OK - Validation activated on ' + node.length + ' form(s)'
             });
-            // {/debug}
 
             if (!node.find(options.submit.settings.button)[0]) {
-
-                // {debug}
                 options.debug && window.Debug.log({
                     'node': node,
                     'function': 'delegateValidation()',
                     'arguments': '{button: ' + options.submit.settings.button + '}',
                     'message': 'ERROR - node.find("' + options.submit.settings.button + '") not found'
                 });
-                // {/debug}
 
                 return false;
 
@@ -447,10 +367,7 @@
                     _executeCallback(options.submit.callback.onAfterSubmit, [node]);
 
                 }
-
-                // {debug}
                 options.debug && window.Debug.print();
-                // {/debug}
 
                 return false;
 
@@ -458,12 +375,7 @@
 
         }
 
-        /**
-         * For every "data-validation" & "data-pattern" attributes that are not disabled inside the jQuery "node" object
-         * the "validateInput" function will be called.
-         *
-         * @returns {boolean} true if no error(s) were found (valid form)
-         */
+        
         function validateForm() {
 
             var isValid = true;
@@ -479,32 +391,64 @@
                 }
             );
 
+            prepareFormData();
+
             return isValid;
 
         }
 
-        /**
-         * Prepare the information from the data attributes
-         * and call the "validateRule" function.
-         *
-         * @param {object} input Reference of the input element
-         *
-         * @returns {boolean} true if no error(s) were found (valid input)
-         */
+        
+        function prepareFormData () {
+
+            var data = {},
+                matches,
+                index;
+
+            for (var i in formData) {
+                if (!formData.hasOwnProperty(i)) continue;
+
+                index = 0;
+                matches = i.split(/\[(.+?)\]/g);
+
+                var tmpObject = {},
+                    tmpArray = [];
+
+                for (var k = matches.length - 1; k >= 0 ; k--) {
+                    if (matches[k] === "") {
+                        matches.splice(k, 1);
+                        continue;
+                    }
+
+                    if (tmpArray.length < 1) {
+                        tmpObject[matches[k]] = formData[i]
+                    } else {
+                        tmpObject = {};
+                        tmpObject[matches[k]] = tmpArray[tmpArray.length - 1];
+                    }
+                    tmpArray.push(tmpObject)
+
+                }
+
+                data = $.extend(true, data, tmpObject);
+
+            }
+
+            formData = data;
+
+        }
+
+        
         function validateInput(input) {
 
             var inputName = $(input).attr('name');
 
             if (!inputName) {
-
-                // {debug}
                 options.debug && window.Debug.log({
                     'node': node,
                     'function': 'validateInput()',
                     'arguments': '$(input).attr("name")',
                     'message': 'ERROR - Missing input [name]'
                 });
-                // {/debug}
 
                 return false;
             }
@@ -528,11 +472,7 @@
             if (validationArray) {
                 validationArray = _api._splitValidation(validationArray);
             }
-
-            // Validates the "data-validation"
             if (validationArray instanceof Array && validationArray.length > 0) {
-
-                // "OPTIONAL" input will not be validated if it's empty
                 if ($.trim(value) === '' && ~validationArray.indexOf('OPTIONAL')) {
                     return true;
                 }
@@ -562,13 +502,9 @@
                 });
 
             }
-
-            // Validates the "data-validation-regex"
             if (validationRegex) {
 
                 var rule = _buildRegexFromString(validationRegex);
-
-                // Do not block validation if a regexp is bad, only skip it
                 if (!(rule instanceof RegExp)) {
                     return true;
                 }
@@ -593,19 +529,8 @@
 
         }
 
-        /**
-         * Validate an input value against one rule.
-         * If a "value-rule" mismatch occurs, an error is thrown to the caller function.
-         *
-         * @param {string} value
-         * @param rule
-         * @param {boolean} [reversed]
-         *
-         * @returns {*} Error if a mismatch occurred.
-         */
+        
         function validateRule(value, rule, reversed) {
-
-            // Validate for "data-validation-regex" and "data-validation-regex-reverse"
             if (rule instanceof RegExp) {
                 var isValid = rule.test(value);
 
@@ -625,20 +550,15 @@
                 }
                 return;
             }
-
-            // Validate for comparison "data-validation"
             var comparison = rule.match(options.rules.COMPARISON);
 
             if (!comparison || comparison.length !== 4) {
-
-                // {debug}
                 options.debug && window.Debug.log({
                     'node': node,
                     'function': 'validateRule()',
                     'arguments': 'value: ' + value + ' rule: ' + rule,
                     'message': 'WARNING - Invalid comparison'
                 });
-                // {/debug}
 
                 return;
             }
@@ -649,21 +569,14 @@
                 comparedValue;
 
             switch (type) {
-
-                // Compare input "Length"
                 case "L":
-
-                    // Only numeric value for "L" are allowed
                     if (isNaN(compared)) {
-
-                        // {debug}
                         options.debug && window.Debug.log({
                             'node': node,
                             'function': 'validateRule()',
                             'arguments': 'compare: ' + compared + ' rule: ' + rule,
                             'message': 'WARNING - Invalid rule, "L" compare must be numeric'
                         });
-                        // {/debug}
 
                         return false;
 
@@ -676,25 +589,18 @@
                     }
 
                     break;
-
-                // Compare input "Value"
                 case "V":
                 default:
-
-                    // Compare Field values
                     if (isNaN(compared)) {
 
                         comparedValue = node.find('[name="' + compared + '"]').val();
                         if (!comparedValue) {
-
-                            // {debug}
                             options.debug && window.Debug.log({
                                 'node': node,
                                 'function': 'validateRule()',
                                 'arguments': 'compare: ' + compared + ' rule: ' + rule,
                                 'message': 'WARNING - Unable to find compared field [name="' + compared + '"]'
                             });
-                            // {/debug}
 
                             return false;
                         }
@@ -704,7 +610,6 @@
                         }
 
                     } else {
-                        // Compare numeric value
                         if (!value || isNaN(value) || !eval(value + operator + parseFloat(compared))) {
                             throw [options.messages[operator].replace(' characters', ''), compared];
                         }
@@ -716,12 +621,7 @@
 
         }
 
-        /**
-         * Register an error into the global "error" variable.
-         *
-         * @param {string} inputName Input where the error occurred
-         * @param {string} error Description of the error to be displayed
-         */
+        
         function registerError(inputName, error) {
 
             if (!errors[inputName]) {
@@ -744,15 +644,7 @@
 
         }
 
-        /**
-         * Display a single error based on "inputName" key inside the "errors" global array.
-         * The input, the label and the "inputContainer" will be given the "errorClass" and other
-         * settings will be considered.
-         *
-         * @param {string} inputName Key used for search into "errors"
-         *
-         * @returns {boolean} false if an unwanted behavior occurs
-         */
+        
         function displayOneError(inputName) {
 
             var input,
@@ -772,15 +664,12 @@
             label = null;
 
             if (!input[0]) {
-
-                // {debug}
                 options.debug && window.Debug.log({
                     'node': node,
                     'function': 'displayOneError()',
                     'arguments': '[name="' + inputName + '"]',
                     'message': 'ERROR - Unable to find input by name "' + inputName + '"'
                 });
-                // {/debug}
 
                 return false;
             }
@@ -796,8 +685,6 @@
                     label.addClass(options.submit.settings.errorClass);
                     errorContainer = label;
                 }
-
-                //node.find('[' + _data.group + '="' + group + '"]').addClass(options.submit.settings.errorClass)
 
             } else {
 
@@ -832,8 +719,6 @@
             } else if (options.submit.settings.display === 'block') {
                 errorContainer = node;
             }
-
-            // Prevent double error list if the previous one has not been cleared.
             if (options.submit.settings.display === 'inline' && errorContainer.find('[' + _data.errorList + ']')[0]) {
                 return false;
             }
@@ -903,9 +788,7 @@
 
         }
 
-        /**
-         * Display all of the errors
-         */
+        
         function displayErrors() {
 
             for (var inputName in errors) {
@@ -915,22 +798,12 @@
 
         }
 
-        /**
-         * Remove an input error.
-         *
-         * @param {string} inputName Key reference to delete the error from "errors" global variable
-         * @param {object} input jQuery object of the input
-         * @param {object} label jQuery object of the input's label
-         * @param {object} container jQuery object of the "errorList"
-         * @param {string} [group] Name of the group if any (ex: used on input radio)
-         */
+        
         function resetOneError(inputName, input, label, container, group) {
 
             delete errors[inputName];
 
             if (container) {
-
-                //window.Validation.hasScrolled = false;
 
                 if (options.submit.settings.inputContainer) {
                     (group ? label : input).parentsUntil(node, options.submit.settings.inputContainer).removeClass(options.submit.settings.errorClass);
@@ -950,15 +823,12 @@
                     input = node.find('[name="' + inputName + '"]');
 
                     if (!input[0]) {
-
-                        // {debug}
                         options.debug && window.Debug.log({
                             'node': node,
                             'function': 'resetOneError()',
                             'arguments': '[name="' + inputName + '"]',
                             'message': 'ERROR - Unable to find input by name "' + inputName + '"'
                         });
-                        // {/debug}
 
                         return false;
                     }
@@ -969,9 +839,7 @@
 
         }
 
-        /**
-         * Remove all of the input error(s) display.
-         */
+        
         function resetErrors() {
 
             errors = [];
@@ -982,23 +850,14 @@
 
         }
 
-        /**
-         * Submits the form once it succeeded the validation process.
-         * Note:
-         * - This function will be overridden if "options.submit.settings.onSubmit" is defined
-         * - The node can't be submitted by jQuery since it has been disabled, use the form native submit function instead
-         */
+        
         function submitForm() {
 
             node[0].submit()
 
         }
 
-        /**
-         * Destroy the Validation instance
-         *
-         * @returns {boolean}
-         */
+        
         function destroy() {
 
             resetErrors();
@@ -1008,25 +867,14 @@
                 $(this).closest('form')[0].submit();
             });
 
-            //delete window.Validation.form[node.selector];
-
             return true;
 
         }
 
-        /**
-         * @private
-         * Helper to get the value of an regular, radio or chackbox input
-         *
-         * @param input
-         *
-         * @returns {string} value
-         */
+        
         var _getInputValue = function (input) {
 
             var value;
-
-            // Get the value or state of the input based on its type
             switch ($(input).attr('type')) {
                 case 'checkbox':
                     value = ($(input).is(':checked')) ? 1 : '';
@@ -1043,11 +891,7 @@
 
         };
 
-        /**
-         * @private
-         * Execute function once the timer is reached.
-         * If the function is recalled before the timer ends, the first call will be canceled.
-         */
+        
         var _typeWatch = (function () {
             var timer = 0;
             return function (callback, ms) {
@@ -1056,30 +900,7 @@
             };
         })();
 
-        /**
-         * @private
-         * Executes an anonymous function or a string reached from the window scope.
-         *
-         * @example
-         * Note: These examples works with every callbacks (onInit, onError, onSubmit, onBeforeSubmit & onAfterSubmit)
-         *
-         * // An anonymous function inside the "onInit" option
-         * onInit: function() { console.log(':D'); };
-         *
-         * * // myFunction() located on window.coucou scope
-         * onInit: 'window.coucou.myFunction'
-         *
-         * // myFunction(a,b) located on window.coucou scope passing 2 parameters
-         * onInit: ['window.coucou.myFunction', [':D', ':)']];
-         *
-         * // Anonymous function to execute a local function
-         * onInit: function () { myFunction(':D'); }
-         *
-         * @param {string|array} callback The function to be called
-         * @param {array} [extraParams] In some cases the function can be called with Extra parameters (onError)
-         *
-         * @returns {boolean}
-         */
+        
         var _executeCallback = function (callback, extraParams) {
 
             if (!callback) {
@@ -1116,15 +937,12 @@
                 }
 
                 if (!_isValid || typeof _callback !== "function") {
-
-                    // {debug}
                     options.debug && window.Debug.log({
                         'node': node,
                         'function': '_executeCallback()',
                         'arguments': JSON.stringify(callback),
                         'message': 'WARNING - Invalid callback function"'
                     });
-                    // {/debug}
 
                     return false;
                 }
@@ -1136,10 +954,7 @@
 
         };
 
-        /**
-         * @private
-         * Constructs Validation
-         */
+        
         this.__construct = function () {
 
             extendOptions();
@@ -1148,153 +963,70 @@
 
             delegateDynamicValidation();
             delegateValidation();
-
-            // {debug}
             options.debug && window.Debug.print();
-            // {/debug}
 
         }();
 
         return {
 
-            /**
-             * @public
-             * Register error
-             *
-             * @param inputName
-             * @param error
-             */
+            
             registerError: registerError,
 
-            /**
-             * @public
-             * Display one error
-             *
-             * @param inputName
-             */
+            
             displayOneError: displayOneError,
 
-            /**
-             * @public
-             * Display all errors
-             */
+            
             displayErrors: displayErrors,
 
-            /**
-             * @public
-             * Remove one error
-             */
+            
             resetOneError: resetOneError,
 
-            /**
-             * @public
-             * Remove all errors
-             */
+            
             resetErrors: resetErrors,
 
-            /**
-             * @public
-             * Destroy the Validation instance
-             */
+            
             destroy: destroy
 
         };
 
     };
 
-    // =================================================================================================================
-
-    /**
-     * @public
-     * jQuery public function to implement the Validation on the selected node(s).
-     *
-     * @param {object} options To configure the Validation class.
-     *
-     * @return {object} Modified DOM element
-     */
+    
     $.fn.validate = $.validate = function (options) {
 
         return _api.validate(this, options);
 
     };
 
-    /**
-     * @public
-     * jQuery public function to add one or multiple "data-validation" argument.
-     *
-     * @param {string|array} validation Arguments to add in the node's data-validation
-     *
-     * @return {object} Modified DOM element
-     */
+    
     $.fn.addValidation = function (validation) {
 
         return _api.addValidation(this, validation);
 
     };
 
-    /**
-     * @public
-     * jQuery public function to remove one or multiple "data-validation" argument.
-     *
-     * @param {string|array} validation Arguments to remove in the node's data-validation
-     *
-     * @return {object} Modified DOM element
-     */
+    
     $.fn.removeValidation = function (validation) {
 
         return _api.removeValidation(this, validation);
 
     };
 
-    /**
-     * @public
-     * jQuery public function to add one or multiple errors.
-     *
-     * @param {object} error Object of errors where the keys are the input names
-     * @example
-     * $('form#myForm').addError({
-     *     'username': 'Invalid username, please choose another one.'
-     * });
-     *
-     * @return {object} Modified DOM element
-     */
+    
     $.fn.addError = function (error) {
 
         return _api.addError(this, error);
 
     };
 
-    /**
-     * @public
-     * jQuery public function to remove one or multiple errors.
-     *
-     * @param {array} error Array of errors where the keys are the input names
-     * @example
-     * $('form#myForm').removeError([
-     *     'username'
-     * ]);
-     *
-     * @return {object} Modified DOM element
-     */
+    
     $.fn.removeError = function (error) {
 
         return _api.removeError(this, error);
 
     };
 
-    /**
-     * @public
-     * jQuery public function to add a validation rule.
-     *
-     * @example
-     * $.alterValidationRules({
-     *     rule: 'FILENAME',
-     *     regex: /^[^\\/:\*\?<>\|\"\']*$/,
-     *     message: '$ has an invalid filename.'
-     * })
-     *
-     * @param {Object|Array} name
-     */
+    
     $.fn.alterValidationRules = $.alterValidationRules = function (rules) {
 
         if (!(rules instanceof Array)) {
@@ -1307,31 +1039,10 @@
 
     };
 
-    // =================================================================================================================
-
-    /**
-     * @private
-     * API to handles "addValidation" and "removeValidation" on attribute "data-validation".
-     * Note: Contains fail-safe operations to unify the validation parameter.
-     *
-     * @example
-     * $.addValidation('NOTEMPTY, L>=6')
-     * $.addValidation('[notempty, v>=6]')
-     * $.removeValidation(['OPTIONAL', 'V>=6'])
-     *
-     * @returns {object} Updated DOM object
-     */
+    
     var _api = {
 
-        /**
-         * @private
-         * This function unifies the data through the validation process.
-         * String, Uppercase and spaceless.
-         *
-         * @param {string|array} validation
-         *
-         * @returns {string}
-         */
+        
         _formatValidation: function (validation) {
 
             validation = validation.toString().replace(/\s/g, '');
@@ -1344,14 +1055,7 @@
 
         },
 
-        /**
-         * @private
-         * Splits the validation into an array, Uppercase the rules if they are not comparisons
-         *
-         * @param {string|array} validation
-         *
-         * @returns {array} Formatted validation keys
-         */
+        
         _splitValidation: function (validation) {
 
             var validationArray = this._formatValidation(validation).split(','),
@@ -1367,36 +1071,19 @@
             return validationArray;
         },
 
-        /**
-         * @private
-         * Joins the validation array to create the "data-validation" value
-         *
-         * @param {array} validation
-         *
-         * @returns {string}
-         */
+        
         _joinValidation: function (validation) {
 
             return '[' + validation.join(', ') + ']';
 
         },
 
-        /**
-         * API method to attach the submit event type on the specified node.
-         * Note: Clears the previous event regardless to avoid double submits or unwanted behaviors.
-         *
-         * @param {object} node jQuery object(s)
-         * @param {object} options To configure the Validation class.
-         *
-         * @returns {*}
-         */
+        
         validate: function (node, options) {
 
             if (typeof node === "function") {
 
                 if (!options.submit.settings.form) {
-
-                    // {debug}
                     window.Debug.log({
                         'node': node,
                         'function': '$.validate()',
@@ -1405,7 +1092,6 @@
                     });
 
                     window.Debug.print();
-                    // {/debug}
 
                     return;
                 }
@@ -1413,8 +1099,6 @@
                 node = $(options.submit.settings.form);
 
                 if (!node[0] || node[0].nodeName.toLowerCase() !== "form") {
-
-                    // {debug}
                     window.Debug.log({
                         'function': '$.validate()',
                         'arguments': JSON.stringify(options.submit.settings.form),
@@ -1422,14 +1106,11 @@
                     });
 
                     window.Debug.print();
-                    // {/debug}
 
                     return;
                 }
 
             } else if (typeof node[0] === 'undefined') {
-
-                // {debug}
                 window.Debug.log({
                     'node': node,
                     'function': '$.validate()',
@@ -1438,7 +1119,6 @@
                 });
 
                 window.Debug.print();
-                // {/debug}
 
                 return;
             }
@@ -1446,8 +1126,6 @@
             if (options === "destroy") {
 
                 if (!window.Validation.form[node.selector]) {
-
-                    // {debug}
                     window.Debug.log({
                         'node': node,
                         'function': '$.validate("destroy")',
@@ -1456,7 +1134,6 @@
                     });
 
                     window.Debug.print();
-                    // {/debug}
 
                     return;
                 }
@@ -1473,16 +1150,7 @@
 
         },
 
-        /**
-         * API method to handle the addition of "data-validation" arguments.
-         * Note: ONLY the predefined validation arguments are allowed to be added
-         * inside the "data-validation" attribute (see configuration).
-         *
-         * @param {object} node jQuery objects
-         * @param {string|array} validation arguments to add in the node(s) "data-validation"
-         *
-         * @returns {*}
-         */
+        
         addValidation: function (node, validation) {
 
             var self = this;
@@ -1517,14 +1185,7 @@
 
         },
 
-        /**
-         * API method to handle the removal of "data-validation" arguments.
-         *
-         * @param {object} node jQuery objects
-         * @param {string|array} validation arguments to remove in the node(s) "data-validation"
-         *
-         * @returns {*}
-         */
+        
         removeValidation: function (node, validation) {
 
             var self = this;
@@ -1567,29 +1228,10 @@
 
         },
 
-        /**
-         * API method to manually trigger a form error.
-         * Note: The same form jQuery selector MUST be used to recuperate the Validation configuration.
-         *
-         * @example
-         * $('#form-signup_v3').addError({
-         *     'inputName': 'my error message',
-         *     'inputName2': [
-         *         'first error message',
-         *         'second error message'
-         *     ]
-         * })
-         *
-         * @param {object} node jQuery object
-         * @param {object} error Object of errors to add on the node
-         *
-         * @returns {*}
-         */
+        
         addError: function (node, error) {
 
             if (!window.Validation.form[node.selector]) {
-
-                // {debug}
                 window.Debug.log({
                     'node': node,
                     'function': '$.addError()',
@@ -1598,14 +1240,11 @@
                 });
 
                 window.Debug.print();
-                // {/debug}
 
                 return false;
             }
 
             if (typeof error !== "object" || Object.prototype.toString.call(error) !== "[object Object]") {
-
-                // {debug}
                 window.Debug.log({
                     'node': node,
                     'function': '$.addError()',
@@ -1614,7 +1253,6 @@
                 });
 
                 window.Debug.print();
-                // {/debug}
 
                 return false;
             }
@@ -1633,8 +1271,6 @@
 
                 input = $(node.selector).find('[name="' + inputName + '"]');
                 if (!input[0]) {
-
-                    // {debug}
                     window.Debug.log({
                         'node': node,
                         'function': '$.addError()',
@@ -1643,7 +1279,6 @@
                     });
 
                     window.Debug.print();
-                    // {/debug}
 
                     continue;
                 }
@@ -1658,8 +1293,6 @@
                 for (var i = 0; i < error[inputName].length; i++) {
 
                     if (typeof error[inputName][i] !== "string") {
-
-                        // {debug}
                         window.Debug.log({
                             'node': node,
                             'function': '$.addError()',
@@ -1668,7 +1301,6 @@
                         });
 
                         window.Debug.print();
-                        // {/debug}
 
                         continue;
                     }
@@ -1683,26 +1315,10 @@
 
         },
 
-        /**
-         * API method to manually remove a form error.
-         * Note: The same form jQuery selector MUST be used to recuperate the Validation configuration.
-         *
-         * @example
-         * $('#form-signin_v2').removeError([
-         *     'signin_v2[username]',
-         *     'signin_v2[password]'
-         * ])
-         *
-         * @param {object} node jQuery object
-         * @param {object} inputName Object of errors to remove on the node
-         *
-         * @returns {*}
-         */
+        
         removeError: function (node, inputName) {
 
             if (!window.Validation.form[node.selector]) {
-
-                // {debug}
                 window.Debug.log({
                     'node': node,
                     'function': '$.removeError()',
@@ -1711,7 +1327,6 @@
                 });
 
                 window.Debug.print();
-                // {/debug}
 
                 return false;
             }
@@ -1722,8 +1337,6 @@
             }
 
             if (typeof inputName === "object" && Object.prototype.toString.call(inputName) !== "[object Array]") {
-
-                // {debug}
                 window.Debug.log({
                     'node': node,
                     'function': '$.removeError()',
@@ -1732,7 +1345,6 @@
                 });
 
                 window.Debug.print();
-                // {/debug}
 
                 return false;
             }
@@ -1746,8 +1358,6 @@
 
                 input = $(node.selector).find('[name="' + inputName[i] + '"]');
                 if (!input[0]) {
-
-                    // {debug}
                     window.Debug.log({
                         'node': node,
                         'function': '$.removeError()',
@@ -1756,7 +1366,6 @@
                     });
 
                     window.Debug.print();
-                    // {/debug}
 
                     continue;
                 }
@@ -1767,28 +1376,15 @@
 
         },
 
-        /**
-         * API method to add a validation rule.
-         *
-         * @example
-         * $.alterValidationRules({
-         *     rule: 'FILENAME',
-         *     regex: /^[^\\/:\*\?<>\|\"\']*$/,
-         *     message: '$ has an invalid filename.'
-         * })
-         *
-         * @param {object} ruleObj
-         */
+        
         alterValidationRules: function (ruleObj) {
 
             if (!ruleObj.rule || (!ruleObj.regex && !ruleObj.message)) {
-                // {debug}
                 window.Debug.log({
                     'function': '$.alterValidationRules()',
                     'message': 'ERROR - Missing one or multiple parameter(s) {rule, regex, message}'
                 });
                 window.Debug.print();
-                // {/debug}
                 return false;
             }
 
@@ -1799,14 +1395,12 @@
                 var regex = _buildRegexFromString(ruleObj.regex);
 
                 if (!(regex instanceof RegExp)) {
-                    // {debug}
                     window.Debug.log({
                         'function': '$.alterValidationRules(rule)',
                         'arguments': regex.toString(),
                         'message': 'ERROR - Invalid rule'
                     });
                     window.Debug.print();
-                    // {/debug}
                     return false;
                 }
 
@@ -1822,13 +1416,7 @@
 
     };
 
-    /**
-     * @private
-     * Converts string into a regex
-     *
-     * @param {String|Object} regex
-     * @returns {Object|Boolean} rule
-     */
+    
     function _buildRegexFromString(regex) {
 
         if (!regex || (typeof regex !== "string" && !(regex instanceof RegExp))) {
@@ -1878,19 +1466,15 @@
         return rule;
 
         function _regexDebug() {
-            // {debug}
             window.Debug.log({
                 'function': '_buildRegexFromString()',
                 'arguments': '{pattern: {' + (pattern || '') + '}, modifier: {' + (modifier || '') + '}',
                 'message': 'WARNING - Invalid regex given: ' + regex
             });
             window.Debug.print();
-            // {/debug}
         }
 
     }
-
-    // {debug}
     window.Debug = {
 
         table: {},
@@ -1940,14 +1524,13 @@
         }
 
     };
-    // {/debug}
 
     String.prototype.capitalize = function () {
         return this.charAt(0).toUpperCase() + this.slice(1);
     };
 
     if (!Array.prototype.indexOf) {
-        Array.prototype.indexOf = function (elt /*, from*/) {
+        Array.prototype.indexOf = function (elt ) {
             var len = this.length >>> 0;
 
             var from = Number(arguments[1]) || 0;
@@ -1965,13 +1548,10 @@
             return -1;
         };
     }
-
-    // {debug}
     if (!JSON && !JSON.stringify) {
         JSON.stringify = function (obj) {
             var t = typeof (obj);
             if (t !== "object" || obj === null) {
-                // simple data type
                 if (t === "string") {
                     obj = '"' + obj + '"';
                 }
@@ -1996,6 +1576,5 @@
             }
         };
     }
-    // {/debug}
 
 }(window, document, window.jQuery));

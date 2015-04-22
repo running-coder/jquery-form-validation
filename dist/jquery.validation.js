@@ -453,6 +453,8 @@
 
                 validateOnce = false;
 
+            formData[inputName] = value;
+
             if (validationArray) {
                 validationArray = _api._splitValidation(validationArray);
             }
@@ -506,8 +508,6 @@
                 }
 
             }
-
-            formData[inputName] = value;
 
             return !errors[inputName] || errors[inputName] instanceof Array && errors[inputName].length === 0;
 

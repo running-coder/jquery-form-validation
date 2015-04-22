@@ -509,7 +509,7 @@
                     }
 
                     if (tmpArray.length < 1) {
-                        tmpObject[matches[k]] = formData[i]
+                        tmpObject[matches[k]] = Number(formData[i]) || formData[i];
                     } else {
                         tmpObject = {};
                         tmpObject[matches[k]] = tmpArray[tmpArray.length - 1];

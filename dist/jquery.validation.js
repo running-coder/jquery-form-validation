@@ -15,14 +15,12 @@
         hasScrolled: false
     };
 
-    
-    if (typeof Object.preventExtensions !== "function") {
+        if (typeof Object.preventExtensions !== "function") {
         Object.preventExtensions = function (obj) {
             return obj;
         };
     }
-    
-    var _rules = {
+        var _rules = {
         NOTEMPTY: /\S/,
         INTEGER: /^\d+$/,
         NUMERIC: /^\d+(?:[,\s]\d{3})*(?:\.\d+)?$/,
@@ -38,8 +36,7 @@
         COMPARISON: /^\s*([LV])\s*([<>]=?|==|!=)\s*([^<>=!]+?)\s*$/
     },
 
-    
-    _messages = {
+        _messages = {
         'default': '$ contain error(s).',
         'NOTEMPTY': '$ must not be empty.',
         'INTEGER': '$ must be an integer.',
@@ -60,8 +57,7 @@
         '!=': '$ must be different than %'
     },
 
-    
-    _data = {
+        _data = {
         validation: 'data-validation',
         validationMessage: 'data-validation-message',
         regex: 'data-validation-regex',
@@ -72,8 +68,7 @@
         errorList: 'data-error-list'
     },
 
-    
-    _options = {
+        _options = {
         submit: {
             settings: {
                 form: null,
@@ -115,8 +110,7 @@
         debug: false
     },
 
-    
-    _supported = {
+        _supported = {
         submit: {
             settings: {
                 display: ["inline", "block"],
@@ -139,8 +133,7 @@
         debug: [true, false]
     };
 
-    
-    var Validation = function (node, options) {
+        var Validation = function (node, options) {
 
         var errors = [],
             messages = {},
@@ -150,8 +143,7 @@
 
         window.Validation.hasScrolled = false;
 
-        
-        function extendRules() {
+                function extendRules() {
             options.rules = $.extend(
                 true,
                 {},
@@ -160,8 +152,7 @@
             );
         }
 
-        
-        function extendMessages() {
+                function extendMessages() {
             options.messages = $.extend(
                 true,
                 {},
@@ -170,8 +161,7 @@
             );
         }
 
-        
-        function extendOptions() {
+                function extendOptions() {
 
             if (!(options instanceof Object)) {
                 options = {};
@@ -255,8 +245,7 @@
 
         }
 
-        
-        function delegateDynamicValidation() {
+                function delegateDynamicValidation() {
 
             if (!options.dynamic.settings.trigger) {
                 return false;
@@ -319,8 +308,7 @@
             );
         }
 
-        
-        function delegateValidation() {
+                function delegateValidation() {
 
             _executeCallback(options.submit.callback.onInit, [node]);
 
@@ -375,8 +363,7 @@
 
         }
 
-        
-        function validateForm() {
+                function validateForm() {
 
             var isValid = true;
 
@@ -397,8 +384,7 @@
 
         }
 
-        
-        function prepareFormData () {
+                function prepareFormData () {
 
             var data = {},
                 matches,
@@ -420,7 +406,7 @@
                     }
 
                     if (tmpArray.length < 1) {
-                        tmpObject[matches[k]] = formData[i]
+                        tmpObject[matches[k]] = Number(formData[i]) || formData[i];
                     } else {
                         tmpObject = {};
                         tmpObject[matches[k]] = tmpArray[tmpArray.length - 1];
@@ -437,8 +423,7 @@
 
         }
 
-        
-        function validateInput(input) {
+                function validateInput(input) {
 
             var inputName = $(input).attr('name');
 
@@ -529,8 +514,7 @@
 
         }
 
-        
-        function validateRule(value, rule, reversed) {
+                function validateRule(value, rule, reversed) {
             if (rule instanceof RegExp) {
                 var isValid = rule.test(value);
 
@@ -621,8 +605,7 @@
 
         }
 
-        
-        function registerError(inputName, error) {
+                function registerError(inputName, error) {
 
             if (!errors[inputName]) {
                 errors[inputName] = [];
@@ -644,8 +627,7 @@
 
         }
 
-        
-        function displayOneError(inputName) {
+                function displayOneError(inputName) {
 
             var input,
                 inputId,
@@ -788,8 +770,7 @@
 
         }
 
-        
-        function displayErrors() {
+                function displayErrors() {
 
             for (var inputName in errors) {
                 if (!errors.hasOwnProperty(inputName)) continue;
@@ -798,8 +779,7 @@
 
         }
 
-        
-        function resetOneError(inputName, input, label, container, group) {
+                function resetOneError(inputName, input, label, container, group) {
 
             delete errors[inputName];
 
@@ -839,8 +819,7 @@
 
         }
 
-        
-        function resetErrors() {
+                function resetErrors() {
 
             errors = [];
             window.Validation.hasScrolled = false;
@@ -850,15 +829,13 @@
 
         }
 
-        
-        function submitForm() {
+                function submitForm() {
 
             node[0].submit()
 
         }
 
-        
-        function destroy() {
+                function destroy() {
 
             resetErrors();
             node.find('[' + _data.validation + '],[' + _data.regex + ']').off(delegateSuffix + ' ' + resetSuffix);
@@ -871,8 +848,7 @@
 
         }
 
-        
-        var _getInputValue = function (input) {
+                var _getInputValue = function (input) {
 
             var value;
             switch ($(input).attr('type')) {
@@ -891,8 +867,7 @@
 
         };
 
-        
-        var _typeWatch = (function () {
+                var _typeWatch = (function () {
             var timer = 0;
             return function (callback, ms) {
                 clearTimeout(timer);
@@ -900,8 +875,7 @@
             };
         })();
 
-        
-        var _executeCallback = function (callback, extraParams) {
+                var _executeCallback = function (callback, extraParams) {
 
             if (!callback) {
                 return false;
@@ -954,8 +928,7 @@
 
         };
 
-        
-        this.__construct = function () {
+                this.__construct = function () {
 
             extendOptions();
             extendRules();
@@ -969,65 +942,53 @@
 
         return {
 
-            
-            registerError: registerError,
+                        registerError: registerError,
 
-            
-            displayOneError: displayOneError,
+                        displayOneError: displayOneError,
 
-            
-            displayErrors: displayErrors,
+                        displayErrors: displayErrors,
 
-            
-            resetOneError: resetOneError,
+                        resetOneError: resetOneError,
 
-            
-            resetErrors: resetErrors,
+                        resetErrors: resetErrors,
 
-            
-            destroy: destroy
+                        destroy: destroy
 
         };
 
     };
 
-    
-    $.fn.validate = $.validate = function (options) {
+        $.fn.validate = $.validate = function (options) {
 
         return _api.validate(this, options);
 
     };
 
-    
-    $.fn.addValidation = function (validation) {
+        $.fn.addValidation = function (validation) {
 
         return _api.addValidation(this, validation);
 
     };
 
-    
-    $.fn.removeValidation = function (validation) {
+        $.fn.removeValidation = function (validation) {
 
         return _api.removeValidation(this, validation);
 
     };
 
-    
-    $.fn.addError = function (error) {
+        $.fn.addError = function (error) {
 
         return _api.addError(this, error);
 
     };
 
-    
-    $.fn.removeError = function (error) {
+        $.fn.removeError = function (error) {
 
         return _api.removeError(this, error);
 
     };
 
-    
-    $.fn.alterValidationRules = $.alterValidationRules = function (rules) {
+        $.fn.alterValidationRules = $.alterValidationRules = function (rules) {
 
         if (!(rules instanceof Array)) {
             rules = [rules];
@@ -1039,11 +1000,9 @@
 
     };
 
-    
-    var _api = {
+        var _api = {
 
-        
-        _formatValidation: function (validation) {
+                _formatValidation: function (validation) {
 
             validation = validation.toString().replace(/\s/g, '');
 
@@ -1055,8 +1014,7 @@
 
         },
 
-        
-        _splitValidation: function (validation) {
+                _splitValidation: function (validation) {
 
             var validationArray = this._formatValidation(validation).split(','),
                 oneValidation;
@@ -1071,15 +1029,13 @@
             return validationArray;
         },
 
-        
-        _joinValidation: function (validation) {
+                _joinValidation: function (validation) {
 
             return '[' + validation.join(', ') + ']';
 
         },
 
-        
-        validate: function (node, options) {
+                validate: function (node, options) {
 
             if (typeof node === "function") {
 
@@ -1150,8 +1106,7 @@
 
         },
 
-        
-        addValidation: function (node, validation) {
+                addValidation: function (node, validation) {
 
             var self = this;
 
@@ -1185,8 +1140,7 @@
 
         },
 
-        
-        removeValidation: function (node, validation) {
+                removeValidation: function (node, validation) {
 
             var self = this;
 
@@ -1228,8 +1182,7 @@
 
         },
 
-        
-        addError: function (node, error) {
+                addError: function (node, error) {
 
             if (!window.Validation.form[node.selector]) {
                 window.Debug.log({
@@ -1315,8 +1268,7 @@
 
         },
 
-        
-        removeError: function (node, inputName) {
+                removeError: function (node, inputName) {
 
             if (!window.Validation.form[node.selector]) {
                 window.Debug.log({
@@ -1376,8 +1328,7 @@
 
         },
 
-        
-        alterValidationRules: function (ruleObj) {
+                alterValidationRules: function (ruleObj) {
 
             if (!ruleObj.rule || (!ruleObj.regex && !ruleObj.message)) {
                 window.Debug.log({
@@ -1416,8 +1367,7 @@
 
     };
 
-    
-    function _buildRegexFromString(regex) {
+        function _buildRegexFromString(regex) {
 
         if (!regex || (typeof regex !== "string" && !(regex instanceof RegExp))) {
             _regexDebug();

@@ -170,8 +170,8 @@
      * @constructor
      * Validation Class
      *
-     * @param {object} node jQuery form object
-     * @param {object} options User defined options
+     * @param {Object} node jQuery form object
+     * @param {Object} options User defined options
      */
     var Validation = function (node, options) {
 
@@ -314,7 +314,7 @@
         /**
          * Delegates the dynamic validation on data-validation and data-validation-regex attributes based on trigger.
          *
-         * @returns {boolean} false if the option is not set
+         * @returns {Boolean} false if the option is not set
          */
         function delegateDynamicValidation() {
 
@@ -459,7 +459,7 @@
          * For every "data-validation" & "data-pattern" attributes that are not disabled inside the jQuery "node" object
          * the "validateInput" function will be called.
          *
-         * @returns {boolean} true if no error(s) were found (valid form)
+         * @returns {Boolean} true if no error(s) were found (valid form)
          */
         function validateForm() {
 
@@ -485,7 +485,7 @@
         /**
          * Loop through formData and build an object
          *
-         * @returns {object} data
+         * @returns {Object} data
          */
         function prepareFormData () {
 
@@ -497,7 +497,7 @@
                 if (!formData.hasOwnProperty(i)) continue;
 
                 index = 0;
-                matches = i.split(/\[(.+?)\]/g);
+                matches = i.split(/\[(.+?)]/g);
 
                 var tmpObject = {},
                     tmpArray = [];
@@ -509,7 +509,7 @@
                     }
 
                     if (tmpArray.length < 1) {
-                        tmpObject[matches[k]] = formData[i]
+                        tmpObject[matches[k]] = Number(formData[i]) || formData[i];
                     } else {
                         tmpObject = {};
                         tmpObject[matches[k]] = tmpArray[tmpArray.length - 1];
@@ -530,9 +530,9 @@
          * Prepare the information from the data attributes
          * and call the "validateRule" function.
          *
-         * @param {object} input Reference of the input element
+         * @param {Object} input Reference of the input element
          *
-         * @returns {boolean} true if no error(s) were found (valid input)
+         * @returns {Boolean} true if no error(s) were found (valid input)
          */
         function validateInput(input) {
 
@@ -640,9 +640,9 @@
          * Validate an input value against one rule.
          * If a "value-rule" mismatch occurs, an error is thrown to the caller function.
          *
-         * @param {string} value
-         * @param rule
-         * @param {boolean} [reversed]
+         * @param {String} value
+         * @param {*} rule
+         * @param {Boolean} [reversed]
          *
          * @returns {*} Error if a mismatch occurred.
          */
@@ -762,8 +762,8 @@
         /**
          * Register an error into the global "error" variable.
          *
-         * @param {string} inputName Input where the error occurred
-         * @param {string} error Description of the error to be displayed
+         * @param {String} inputName Input where the error occurred
+         * @param {String} error Description of the error to be displayed
          */
         function registerError(inputName, error) {
 
@@ -792,9 +792,9 @@
          * The input, the label and the "inputContainer" will be given the "errorClass" and other
          * settings will be considered.
          *
-         * @param {string} inputName Key used for search into "errors"
+         * @param {String} inputName Key used for search into "errors"
          *
-         * @returns {boolean} false if an unwanted behavior occurs
+         * @returns {Boolean} false if an unwanted behavior occurs
          */
         function displayOneError(inputName) {
 
@@ -961,11 +961,11 @@
         /**
          * Remove an input error.
          *
-         * @param {string} inputName Key reference to delete the error from "errors" global variable
-         * @param {object} input jQuery object of the input
-         * @param {object} label jQuery object of the input's label
-         * @param {object} container jQuery object of the "errorList"
-         * @param {string} [group] Name of the group if any (ex: used on input radio)
+         * @param {String} inputName Key reference to delete the error from "errors" global variable
+         * @param {Object} input jQuery object of the input
+         * @param {Object} label jQuery object of the input's label
+         * @param {Object} container jQuery object of the "errorList"
+         * @param {String} [group] Name of the group if any (ex: used on input radio)
          */
         function resetOneError(inputName, input, label, container, group) {
 
@@ -1040,7 +1040,7 @@
         /**
          * Destroy the Validation instance
          *
-         * @returns {boolean}
+         * @returns {Boolean}
          */
         function destroy() {
 
@@ -1063,7 +1063,7 @@
          *
          * @param input
          *
-         * @returns {string} value
+         * @returns {String} value
          */
         var _getInputValue = function (input) {
 
@@ -1118,10 +1118,10 @@
          * // Anonymous function to execute a local function
          * onInit: function () { myFunction(':D'); }
          *
-         * @param {string|array} callback The function to be called
-         * @param {array} [extraParams] In some cases the function can be called with Extra parameters (onError)
+         * @param {String|Array} callback The function to be called
+         * @param {Array} [extraParams] In some cases the function can be called with Extra parameters (onError)
          *
-         * @returns {boolean}
+         * @returns {Boolean}
          */
         var _executeCallback = function (callback, extraParams) {
 
@@ -1380,7 +1380,7 @@
             validation = validation.toString().replace(/\s/g, '');
 
             if (validation.charAt(0) === "[" && validation.charAt(validation.length - 1) === "]") {
-                validation = validation.replace(/^\[|\]$/g, '');
+                validation = validation.replace(/^\[|]$/g, '');
             }
 
             return validation;
@@ -1391,9 +1391,9 @@
          * @private
          * Splits the validation into an array, Uppercase the rules if they are not comparisons
          *
-         * @param {string|array} validation
+         * @param {String|Array} validation
          *
-         * @returns {array} Formatted validation keys
+         * @returns {Array} Formatted validation keys
          */
         _splitValidation: function (validation) {
 
@@ -1414,9 +1414,9 @@
          * @private
          * Joins the validation array to create the "data-validation" value
          *
-         * @param {array} validation
+         * @param {Array} validation
          *
-         * @returns {string}
+         * @returns {String}
          */
         _joinValidation: function (validation) {
 
@@ -1428,8 +1428,8 @@
          * API method to attach the submit event type on the specified node.
          * Note: Clears the previous event regardless to avoid double submits or unwanted behaviors.
          *
-         * @param {object} node jQuery object(s)
-         * @param {object} options To configure the Validation class.
+         * @param {Object} node jQuery object(s)
+         * @param {Object} options To configure the Validation class.
          *
          * @returns {*}
          */
@@ -1521,8 +1521,8 @@
          * Note: ONLY the predefined validation arguments are allowed to be added
          * inside the "data-validation" attribute (see configuration).
          *
-         * @param {object} node jQuery objects
-         * @param {string|array} validation arguments to add in the node(s) "data-validation"
+         * @param {Object} node jQuery objects
+         * @param {String|Array} validation arguments to add in the node(s) "data-validation"
          *
          * @returns {*}
          */
@@ -1563,8 +1563,8 @@
         /**
          * API method to handle the removal of "data-validation" arguments.
          *
-         * @param {object} node jQuery objects
-         * @param {string|array} validation arguments to remove in the node(s) "data-validation"
+         * @param {Object} node jQuery objects
+         * @param {String|Array} validation arguments to remove in the node(s) "data-validation"
          *
          * @returns {*}
          */
@@ -1623,8 +1623,8 @@
          *     ]
          * })
          *
-         * @param {object} node jQuery object
-         * @param {object} error Object of errors to add on the node
+         * @param {Object} node jQuery object
+         * @param {Object} error Object of errors to add on the node
          *
          * @returns {*}
          */
@@ -1736,8 +1736,8 @@
          *     'signin_v2[password]'
          * ])
          *
-         * @param {object} node jQuery object
-         * @param {object} inputName Object of errors to remove on the node
+         * @param {Object} node jQuery object
+         * @param {Object} inputName Object of errors to remove on the node
          *
          * @returns {*}
          */
@@ -1820,7 +1820,7 @@
          *     message: '$ has an invalid filename.'
          * })
          *
-         * @param {object} ruleObj
+         * @param {Object} ruleObj
          */
         alterValidationRules: function (ruleObj) {
 

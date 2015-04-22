@@ -6,8 +6,9 @@
  * @author Tom Bertrand
  * @version 2.0.0 (2015-04-22)
  * @link http://www.runningcoder.org/jqueryvalidation/
-*/
-;(function (window, document, $, undefined) {
+ */
+;
+(function(window, document, $, undefined) {
 
     window.Validation = {
         form: [],
@@ -15,162 +16,150 @@
         hasScrolled: false
     };
 
-    
     if (typeof Object.preventExtensions !== "function") {
-        Object.preventExtensions = function (obj) {
+        Object.preventExtensions = function(obj) {
             return obj;
         };
     }
-    
     var _rules = {
-        NOTEMPTY: /\S/,
-        INTEGER: /^\d+$/,
-        NUMERIC: /^\d+(?:[,\s]\d{3})*(?:\.\d+)?$/,
-        MIXED: /^[\w\s-]+$/,
-        NAME: /^['a-zãàáäâẽèéëêìíïîõòóöôùúüûñç\s-]+$/i,
-        NOSPACE: /^(?!\s)\S*$/,
-        TRIM: /^[^\s].*[^\s]$/,
-        DATE: /^\d{4}-\d{2}-\d{2}(\s\d{2}:\d{2}(:\d{2})?)?$/,
-        EMAIL: /^([^@]+?)@(([a-z0-9]-*)*[a-z0-9]+\.)+([a-z0-9]+)$/i,
-        URL: /^(https?:\/\/)?((([a-z0-9]-*)*[a-z0-9]+\.?)*([a-z0-9]+))(\/[\w?=\.-]*)*$/,
-        PHONE: /^(\()?\d{3}(\))?(-|\s)?\d{3}(-|\s)\d{4}$/,
-        OPTIONAL: /\S/,
-        COMPARISON: /^\s*([LV])\s*([<>]=?|==|!=)\s*([^<>=!]+?)\s*$/
-    },
+            NOTEMPTY: /\S/,
+            INTEGER: /^\d+$/,
+            NUMERIC: /^\d+(?:[,\s]\d{3})*(?:\.\d+)?$/,
+            MIXED: /^[\w\s-]+$/,
+            NAME: /^['a-zãàáäâẽèéëêìíïîõòóöôùúüûñç\s-]+$/i,
+            NOSPACE: /^(?!\s)\S*$/,
+            TRIM: /^[^\s].*[^\s]$/,
+            DATE: /^\d{4}-\d{2}-\d{2}(\s\d{2}:\d{2}(:\d{2})?)?$/,
+            EMAIL: /^([^@]+?)@(([a-z0-9]-*)*[a-z0-9]+\.)+([a-z0-9]+)$/i,
+            URL: /^(https?:\/\/)?((([a-z0-9]-*)*[a-z0-9]+\.?)*([a-z0-9]+))(\/[\w?=\.-]*)*$/,
+            PHONE: /^(\()?\d{3}(\))?(-|\s)?\d{3}(-|\s)\d{4}$/,
+            OPTIONAL: /\S/,
+            COMPARISON: /^\s*([LV])\s*([<>]=?|==|!=)\s*([^<>=!]+?)\s*$/
+        },
 
-    
-    _messages = {
-        'default': '$ contain error(s).',
-        'NOTEMPTY': '$ must not be empty.',
-        'INTEGER': '$ must be an integer.',
-        'NUMERIC': '$ must be numeric.',
-        'MIXED': '$ must be letters or numbers (no special characters).',
-        'NAME': '$ must not contain special characters.',
-        'NOSPACE': '$ must not contain spaces.',
-        'TRIM': '$ must not start or end with space character.',
-        'DATE': '$ is not a valid with format YYYY-MM-DD.',
-        'EMAIL': '$ is not valid.',
-        'URL': '$ is not valid.',
-        'PHONE': '$ is not a valid phone number.',
-        '<': '$ must be less than % characters.',
-        '<=': '$ must be less or equal to % characters.',
-        '>': '$ must be greater than % characters.',
-        '>=': '$ must be greater or equal to % characters.',
-        '==': '$ must be equal to %',
-        '!=': '$ must be different than %'
-    },
+        _messages = {
+            'default': '$ contain error(s).',
+            'NOTEMPTY': '$ must not be empty.',
+            'INTEGER': '$ must be an integer.',
+            'NUMERIC': '$ must be numeric.',
+            'MIXED': '$ must be letters or numbers (no special characters).',
+            'NAME': '$ must not contain special characters.',
+            'NOSPACE': '$ must not contain spaces.',
+            'TRIM': '$ must not start or end with space character.',
+            'DATE': '$ is not a valid with format YYYY-MM-DD.',
+            'EMAIL': '$ is not valid.',
+            'URL': '$ is not valid.',
+            'PHONE': '$ is not a valid phone number.',
+            '<': '$ must be less than % characters.',
+            '<=': '$ must be less or equal to % characters.',
+            '>': '$ must be greater than % characters.',
+            '>=': '$ must be greater or equal to % characters.',
+            '==': '$ must be equal to %',
+            '!=': '$ must be different than %'
+        },
 
-    
-    _data = {
-        validation: 'data-validation',
-        validationMessage: 'data-validation-message',
-        regex: 'data-validation-regex',
-        regexReverse: 'data-validation-regex-reverse',
-        regexMessage: 'data-validation-regex-message',
-        group: 'data-validation-group',
-        label: 'data-validation-label',
-        errorList: 'data-error-list'
-    },
+        _data = {
+            validation: 'data-validation',
+            validationMessage: 'data-validation-message',
+            regex: 'data-validation-regex',
+            regexReverse: 'data-validation-regex-reverse',
+            regexMessage: 'data-validation-regex-message',
+            group: 'data-validation-group',
+            label: 'data-validation-label',
+            errorList: 'data-error-list'
+        },
 
-    
-    _options = {
-        submit: {
-            settings: {
-                form: null,
-                display: "inline",
-                insertion: "append",
-                allErrors: false,
-                trigger: "click",
-                button: "[type='submit']",
-                errorClass: "error",
-                errorListClass: "error-list",
-                errorListContainer: null,
-                inputContainer: null,
-                clear: "focusin",
-                scrollToError: false
+        _options = {
+            submit: {
+                settings: {
+                    form: null,
+                    display: "inline",
+                    insertion: "append",
+                    allErrors: false,
+                    trigger: "click",
+                    button: "[type='submit']",
+                    errorClass: "error",
+                    errorListClass: "error-list",
+                    errorListContainer: null,
+                    inputContainer: null,
+                    clear: "focusin",
+                    scrollToError: false
+                },
+                callback: {
+                    onInit: null,
+                    onValidate: null,
+                    onError: null,
+                    onBeforeSubmit: null,
+                    onSubmit: null,
+                    onAfterSubmit: null
+                }
             },
-            callback: {
-                onInit: null,
-                onValidate: null,
-                onError: null,
-                onBeforeSubmit: null,
-                onSubmit: null,
-                onAfterSubmit: null
-            }
-        },
-        dynamic: {
-            settings: {
-                trigger: null,
-                delay: 300
+            dynamic: {
+                settings: {
+                    trigger: null,
+                    delay: 300
+                },
+                callback: {
+                    onSuccess: null,
+                    onError: null,
+                    onComplete: null
+                }
             },
-            callback: {
-                onSuccess: null,
-                onError: null,
-                onComplete: null
-            }
+            rules: {},
+            messages: {},
+            labels: {},
+            debug: false
         },
-        rules: {},
-        messages: {},
-        labels: {},
-        debug: false
-    },
 
-    
-    _supported = {
-        submit: {
-            settings: {
-                display: ["inline", "block"],
-                insertion: ["append", "prepend"], //"before", "insertBefore", "after", "insertAfter"
-                allErrors: [true, false],
-                clear: ["focusin", "keypress", false],
-                trigger: [
-                    "click", "dblclick", "focusout",
-                    "hover", "mousedown", "mouseenter",
-                    "mouseleave", "mousemove", "mouseout",
-                    "mouseover", "mouseup", "toggle"
-                ]
-            }
-        },
-        dynamic: {
-            settings: {
-                trigger: ["focusout", "keydown", "keypress", "keyup"]
-            }
-        },
-        debug: [true, false]
-    };
+        _supported = {
+            submit: {
+                settings: {
+                    display: ["inline", "block"],
+                    insertion: ["append", "prepend"], //"before", "insertBefore", "after", "insertAfter"
+                    allErrors: [true, false],
+                    clear: ["focusin", "keypress", false],
+                    trigger: [
+                        "click", "dblclick", "focusout",
+                        "hover", "mousedown", "mouseenter",
+                        "mouseleave", "mousemove", "mouseout",
+                        "mouseover", "mouseup", "toggle"
+                    ]
+                }
+            },
+            dynamic: {
+                settings: {
+                    trigger: ["focusout", "keydown", "keypress", "keyup"]
+                }
+            },
+            debug: [true, false]
+        };
 
-    
-    var Validation = function (node, options) {
+    var Validation = function(node, options) {
 
         var errors = [],
             messages = {},
             formData = {},
             delegateSuffix = ".vd", // validation.delegate
-            resetSuffix = ".vr";    // validation.resetError
+            resetSuffix = ".vr"; // validation.resetError
 
         window.Validation.hasScrolled = false;
 
-        
         function extendRules() {
             options.rules = $.extend(
-                true,
-                {},
+                true, {},
                 _rules,
                 options.rules
             );
         }
 
-        
         function extendMessages() {
             options.messages = $.extend(
-                true,
-                {},
+                true, {},
                 _messages,
                 options.messages
             );
         }
 
-        
         function extendOptions() {
 
             if (!(options instanceof Object)) {
@@ -255,7 +244,6 @@
 
         }
 
-        
         function delegateDynamicValidation() {
 
             if (!options.dynamic.settings.trigger) {
@@ -286,9 +274,9 @@
 
             $.each(
                 node.find('[' + _data.validation + '],[' + _data.regex + ']'),
-                function (index, input) {
+                function(index, input) {
 
-                    $(input).unbind(event).on(event, function (e) {
+                    $(input).unbind(event).on(event, function(e) {
 
                         if ($(this).is(':disabled')) {
                             return false;
@@ -297,7 +285,7 @@
                         var input = this,
                             keyCode = e.keyCode || null;
 
-                        _typeWatch(function () {
+                        _typeWatch(function() {
 
                             if (!validateInput(input)) {
 
@@ -319,7 +307,6 @@
             );
         }
 
-        
         function delegateValidation() {
 
             _executeCallback(options.submit.callback.onInit, [node]);
@@ -345,7 +332,7 @@
             }
 
             node.on("submit", false);
-            node.find(options.submit.settings.button).off('.vd').on(event, function (e) {
+            node.find(options.submit.settings.button).off('.vd').on(event, function(e) {
 
                 e.preventDefault();
 
@@ -362,7 +349,7 @@
 
                     _executeCallback(options.submit.callback.onBeforeSubmit, [node]);
 
-                    (options.submit.callback.onSubmit) ? _executeCallback(options.submit.callback.onSubmit, [node, formData]) : submitForm();
+                    (options.submit.callback.onSubmit) ? _executeCallback(options.submit.callback.onSubmit, [node, formData]): submitForm();
 
                     _executeCallback(options.submit.callback.onAfterSubmit, [node]);
 
@@ -375,7 +362,6 @@
 
         }
 
-        
         function validateForm() {
 
             var isValid = true;
@@ -384,7 +370,7 @@
 
             $.each(
                 node.find('[' + _data.validation + ']:not([disabled]),[' + _data.regex + ']:not([disabled])'),
-                function (index, input) {
+                function(index, input) {
                     if (!validateInput(input)) {
                         isValid = false;
                     }
@@ -397,8 +383,7 @@
 
         }
 
-        
-        function prepareFormData () {
+        function prepareFormData() {
 
             var data = {},
                 matches,
@@ -408,19 +393,19 @@
                 if (!formData.hasOwnProperty(i)) continue;
 
                 index = 0;
-                matches = i.split(/\[(.+?)\]/g);
+                matches = i.split(/\[(.+?)]/g);
 
                 var tmpObject = {},
                     tmpArray = [];
 
-                for (var k = matches.length - 1; k >= 0 ; k--) {
+                for (var k = matches.length - 1; k >= 0; k--) {
                     if (matches[k] === "") {
                         matches.splice(k, 1);
                         continue;
                     }
 
                     if (tmpArray.length < 1) {
-                        tmpObject[matches[k]] = formData[i]
+                        tmpObject[matches[k]] = Number(formData[i]) || formData[i];
                     } else {
                         tmpObject = {};
                         tmpObject[matches[k]] = tmpArray[tmpArray.length - 1];
@@ -437,7 +422,6 @@
 
         }
 
-        
         function validateInput(input) {
 
             var inputName = $(input).attr('name');
@@ -457,9 +441,9 @@
 
                 matches = inputName.replace(/]$/, '').split(/]\[|[[\]]/g),
                 inputShortName = window.Validation.labels[inputName] ||
-                    options.labels[inputName] ||
-                    $(input).attr(_data.label) ||
-                    matches[matches.length - 1],
+                options.labels[inputName] ||
+                $(input).attr(_data.label) ||
+                matches[matches.length - 1],
 
                 validationArray = $(input).attr(_data.validation),
                 validationMessage = $(input).attr(_data.validationMessage),
@@ -477,7 +461,7 @@
                     return true;
                 }
 
-                $.each(validationArray, function (i, rule) {
+                $.each(validationArray, function(i, rule) {
 
                     if (validateOnce === true) {
                         return true;
@@ -529,7 +513,6 @@
 
         }
 
-        
         function validateRule(value, rule, reversed) {
             if (rule instanceof RegExp) {
                 var isValid = rule.test(value);
@@ -621,7 +604,6 @@
 
         }
 
-        
         function registerError(inputName, error) {
 
             if (!errors[inputName]) {
@@ -644,7 +626,6 @@
 
         }
 
-        
         function displayOneError(inputName) {
 
             var input,
@@ -757,9 +738,9 @@
                     }
                 }
 
-                input.unbind(event).on(event, function (a, b, c, d, e) {
+                input.unbind(event).on(event, function(a, b, c, d, e) {
 
-                    return function () {
+                    return function() {
                         if (e) {
                             if ($(c).hasClass(options.submit.settings.errorClass)) {
                                 resetOneError(a, b, c, d, e);
@@ -788,7 +769,6 @@
 
         }
 
-        
         function displayErrors() {
 
             for (var inputName in errors) {
@@ -798,7 +778,6 @@
 
         }
 
-        
         function resetOneError(inputName, input, label, container, group) {
 
             delete errors[inputName];
@@ -839,7 +818,6 @@
 
         }
 
-        
         function resetErrors() {
 
             errors = [];
@@ -850,20 +828,18 @@
 
         }
 
-        
         function submitForm() {
 
             node[0].submit()
 
         }
 
-        
         function destroy() {
 
             resetErrors();
             node.find('[' + _data.validation + '],[' + _data.regex + ']').off(delegateSuffix + ' ' + resetSuffix);
 
-            node.find(options.submit.settings.button).off(delegateSuffix).on('click' + delegateSuffix, function () {
+            node.find(options.submit.settings.button).off(delegateSuffix).on('click' + delegateSuffix, function() {
                 $(this).closest('form')[0].submit();
             });
 
@@ -871,8 +847,7 @@
 
         }
 
-        
-        var _getInputValue = function (input) {
+        var _getInputValue = function(input) {
 
             var value;
             switch ($(input).attr('type')) {
@@ -891,17 +866,15 @@
 
         };
 
-        
-        var _typeWatch = (function () {
+        var _typeWatch = (function() {
             var timer = 0;
-            return function (callback, ms) {
+            return function(callback, ms) {
                 clearTimeout(timer);
                 timer = setTimeout(callback, ms);
             };
         })();
 
-        
-        var _executeCallback = function (callback, extraParams) {
+        var _executeCallback = function(callback, extraParams) {
 
             if (!callback) {
                 return false;
@@ -954,8 +927,7 @@
 
         };
 
-        
-        this.__construct = function () {
+        this.__construct = function() {
 
             extendOptions();
             extendRules();
@@ -969,65 +941,53 @@
 
         return {
 
-            
             registerError: registerError,
 
-            
             displayOneError: displayOneError,
 
-            
             displayErrors: displayErrors,
 
-            
             resetOneError: resetOneError,
 
-            
             resetErrors: resetErrors,
 
-            
             destroy: destroy
 
         };
 
     };
 
-    
-    $.fn.validate = $.validate = function (options) {
+    $.fn.validate = $.validate = function(options) {
 
         return _api.validate(this, options);
 
     };
 
-    
-    $.fn.addValidation = function (validation) {
+    $.fn.addValidation = function(validation) {
 
         return _api.addValidation(this, validation);
 
     };
 
-    
-    $.fn.removeValidation = function (validation) {
+    $.fn.removeValidation = function(validation) {
 
         return _api.removeValidation(this, validation);
 
     };
 
-    
-    $.fn.addError = function (error) {
+    $.fn.addError = function(error) {
 
         return _api.addError(this, error);
 
     };
 
-    
-    $.fn.removeError = function (error) {
+    $.fn.removeError = function(error) {
 
         return _api.removeError(this, error);
 
     };
 
-    
-    $.fn.alterValidationRules = $.alterValidationRules = function (rules) {
+    $.fn.alterValidationRules = $.alterValidationRules = function(rules) {
 
         if (!(rules instanceof Array)) {
             rules = [rules];
@@ -1039,24 +999,21 @@
 
     };
 
-    
     var _api = {
 
-        
-        _formatValidation: function (validation) {
+        _formatValidation: function(validation) {
 
             validation = validation.toString().replace(/\s/g, '');
 
             if (validation.charAt(0) === "[" && validation.charAt(validation.length - 1) === "]") {
-                validation = validation.replace(/^\[|\]$/g, '');
+                validation = validation.replace(/^\[|]$/g, '');
             }
 
             return validation;
 
         },
 
-        
-        _splitValidation: function (validation) {
+        _splitValidation: function(validation) {
 
             var validationArray = this._formatValidation(validation).split(','),
                 oneValidation;
@@ -1071,15 +1028,13 @@
             return validationArray;
         },
 
-        
-        _joinValidation: function (validation) {
+        _joinValidation: function(validation) {
 
             return '[' + validation.join(', ') + ']';
 
         },
 
-        
-        validate: function (node, options) {
+        validate: function(node, options) {
 
             if (typeof node === "function") {
 
@@ -1144,14 +1099,13 @@
 
             }
 
-            return node.each(function () {
+            return node.each(function() {
                 window.Validation.form[node.selector] = new Validation($(this), options);
             });
 
         },
 
-        
-        addValidation: function (node, validation) {
+        addValidation: function(node, validation) {
 
             var self = this;
 
@@ -1161,7 +1115,7 @@
                 return false;
             }
 
-            return node.each(function () {
+            return node.each(function() {
 
                 var $this = $(this),
                     validationData = $this.attr(_data.validation),
@@ -1185,8 +1139,7 @@
 
         },
 
-        
-        removeValidation: function (node, validation) {
+        removeValidation: function(node, validation) {
 
             var self = this;
 
@@ -1195,7 +1148,7 @@
                 return false;
             }
 
-            return node.each(function () {
+            return node.each(function() {
 
                 var $this = $(this),
                     validationData = $this.attr(_data.validation),
@@ -1228,8 +1181,7 @@
 
         },
 
-        
-        addError: function (node, error) {
+        addError: function(node, error) {
 
             if (!window.Validation.form[node.selector]) {
                 window.Debug.log({
@@ -1315,8 +1267,7 @@
 
         },
 
-        
-        removeError: function (node, inputName) {
+        removeError: function(node, inputName) {
 
             if (!window.Validation.form[node.selector]) {
                 window.Debug.log({
@@ -1376,8 +1327,7 @@
 
         },
 
-        
-        alterValidationRules: function (ruleObj) {
+        alterValidationRules: function(ruleObj) {
 
             if (!ruleObj.rule || (!ruleObj.regex && !ruleObj.message)) {
                 window.Debug.log({
@@ -1416,7 +1366,6 @@
 
     };
 
-    
     function _buildRegexFromString(regex) {
 
         if (!regex || (typeof regex !== "string" && !(regex instanceof RegExp))) {
@@ -1478,24 +1427,22 @@
     window.Debug = {
 
         table: {},
-        log: function (debugObject) {
+        log: function(debugObject) {
 
             if (!debugObject.message || typeof debugObject.message !== "string") {
                 return false;
             }
 
             this.table[debugObject.message] = $.extend(
-                Object.preventExtensions(
-                    {
-                        'node': '',
-                        'function': '',
-                        'arguments': ''
-                    }
-                ), debugObject
+                Object.preventExtensions({
+                    'node': '',
+                    'function': '',
+                    'arguments': ''
+                }), debugObject
             );
 
         },
-        print: function () {
+        print: function() {
 
             if ($.isEmptyObject(this.table)) {
                 return false;
@@ -1508,7 +1455,7 @@
                 if (console.table) {
                     console.table(this.table);
                 } else {
-                    $.each(this.table, function (index, data) {
+                    $.each(this.table, function(index, data) {
                         console.log(data['Name'] + ': ' + data['Execution Time'] + 'ms');
                     });
                 }
@@ -1525,18 +1472,16 @@
 
     };
 
-    String.prototype.capitalize = function () {
+    String.prototype.capitalize = function() {
         return this.charAt(0).toUpperCase() + this.slice(1);
     };
 
     if (!Array.prototype.indexOf) {
-        Array.prototype.indexOf = function (elt ) {
+        Array.prototype.indexOf = function(elt) {
             var len = this.length >>> 0;
 
             var from = Number(arguments[1]) || 0;
-            from = (from < 0)
-                ? Math.ceil(from)
-                : Math.floor(from);
+            from = (from < 0) ? Math.ceil(from) : Math.floor(from);
             if (from < 0)
                 from += len;
 
@@ -1549,24 +1494,23 @@
         };
     }
     if (!JSON && !JSON.stringify) {
-        JSON.stringify = function (obj) {
-            var t = typeof (obj);
+        JSON.stringify = function(obj) {
+            var t = typeof(obj);
             if (t !== "object" || obj === null) {
                 if (t === "string") {
                     obj = '"' + obj + '"';
                 }
                 return String(obj);
-            }
-            else {
-                var n, v, json = [], arr = (obj && obj.constructor === Array);
+            } else {
+                var n, v, json = [],
+                    arr = (obj && obj.constructor === Array);
                 for (n in obj) {
                     if (true) {
                         v = obj[n];
                         t = typeof(v);
                         if (t === "string") {
                             v = '"' + v + '"';
-                        }
-                        else if (t === "object" && v !== null) {
+                        } else if (t === "object" && v !== null) {
                             v = JSON.stringify(v);
                         }
                         json.push((arr ? "" : '"' + n + '": ') + String(v));

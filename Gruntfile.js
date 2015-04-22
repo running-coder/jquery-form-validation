@@ -39,7 +39,7 @@ module.exports = function (grunt) {
                     singleline: true,
                     multiline: true
                 },
-                src: [ 'dist/*.js']
+                src: [ 'dist/jquery.validation.js']
             }
         },
 
@@ -64,7 +64,7 @@ module.exports = function (grunt) {
                 options: {
                     patterns: [
                         {
-                            match: /\s?\{debug\}[\s\S]*?\{\/debug\}/g,
+                            match: /\/\/\s?\{debug}[\s\S]*?\{\/debug}/g,
                             replacement: ''
                         }
                     ]
@@ -80,7 +80,7 @@ module.exports = function (grunt) {
                 options: {
                     patterns: [
                         {
-                            match: /\/\*[^!][\S\s]+?\*\/[\r\n]?/gm,
+                            match: /\/\*[^!][\S\s]+?\*\//gm,
                             replacement: ''
                         }
                     ]
@@ -91,6 +91,12 @@ module.exports = function (grunt) {
                         dest: 'dist/jquery.validation.js'
                     }
                 ]
+            }
+        },
+
+        jsbeautifier : {
+            files : ['dist/jquery.validation.js'],
+            options : {
             }
         },
 
@@ -114,6 +120,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-stripcomments');
     grunt.loadNpmTasks('grunt-replace');
+    grunt.loadNpmTasks("grunt-jsbeautifier");
     grunt.loadNpmTasks('grunt-contrib-uglify');
 
     grunt.registerTask('default', [
@@ -122,6 +129,7 @@ module.exports = function (grunt) {
         'copy:dist',
         'comments',
         'replace:removeComments',
+        'jsbeautifier',
         'replace:removeDebug',
         'uglify'
     ]);

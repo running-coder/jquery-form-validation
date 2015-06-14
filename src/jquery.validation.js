@@ -4,10 +4,11 @@
  * Licensed under the MIT license
  *
  * @author Tom Bertrand
- * @version 2.0.0 (2015-04-22)
+ * @version 1.5.3 (2015-06-14)
  * @link http://www.runningcoder.org/jqueryvalidation/
 */
-;(function (window, document, $, undefined) {
+;
+(function (window, document, $, undefined) {
 
     window.Validation = {
         form: [],
@@ -47,13 +48,13 @@
         PHONE: /^(\()?\d{3}(\))?(-|\s)?\d{3}(-|\s)\d{4}$/,
         OPTIONAL: /\S/,
         COMPARISON: /^\s*([LV])\s*([<>]=?|==|!=)\s*([^<>=!]+?)\s*$/
-    },
+    };
 
     /**
      * @private
      * Error messages
      */
-    _messages = {
+    var _messages = {
         'default': '$ contain error(s).',
         'NOTEMPTY': '$ must not be empty.',
         'INTEGER': '$ must be an integer.',
@@ -72,13 +73,13 @@
         '>=': '$ must be greater or equal to % characters.',
         '==': '$ must be equal to %',
         '!=': '$ must be different than %'
-    },
+    };
 
     /**
      * @private
      * HTML5 data attributes
      */
-    _data = {
+    var _data = {
         validation: 'data-validation',
         validationMessage: 'data-validation-message',
         regex: 'data-validation-regex',
@@ -87,7 +88,7 @@
         group: 'data-validation-group',
         label: 'data-validation-label',
         errorList: 'data-error-list'
-    },
+    }
 
     /**
      * @private
@@ -95,7 +96,7 @@
      *
      * @link http://www.runningcoder.org/jqueryvalidation/documentation/
      */
-    _options = {
+    var _options = {
         submit: {
             settings: {
                 form: null,
@@ -135,13 +136,13 @@
         messages: {},
         labels: {},
         debug: false
-    },
+    };
 
     /**
      * @private
      * Limit the supported options on matching keys
      */
-    _supported = {
+    var _supported = {
         submit: {
             settings: {
                 display: ["inline", "block"],
@@ -326,7 +327,6 @@
             options.debug && window.Debug.log({
                 'node': node,
                 'function': 'delegateDynamicValidation()',
-                'arguments': JSON.stringify(options),
                 'message': 'OK - Dynamic Validation activated on ' + node.length + ' form(s)'
             });
             // {/debug}
@@ -401,7 +401,6 @@
             options.debug && window.Debug.log({
                 'node': node,
                 'function': 'delegateValidation()',
-                'arguments': JSON.stringify(options),
                 'message': 'OK - Validation activated on ' + node.length + ' form(s)'
             });
             // {/debug}
@@ -467,11 +466,24 @@
 
             formData = {};
 
+
             $.each(
-                node.find('[' + _data.validation + ']:not([disabled]),[' + _data.regex + ']:not([disabled])'),
+                node.find('input:not([type="submit"]), select, textarea'),
                 function (index, input) {
-                    if (!validateInput(input)) {
-                        isValid = false;
+
+                    input = $(input);
+
+                    var value = _getInputValue(input[0]),
+                        inputName = input.attr('name');
+
+                    if (inputName) {
+                        formData[inputName] = value;
+                    }
+
+                    if (!input.attr('disabled') && (!!input.attr(_data.validation) || !!input.attr(_data.regex))) {
+                        if (!validateInput(input[0], value)) {
+                            isValid = false;
+                        }
                     }
                 }
             );
@@ -487,7 +499,7 @@
          *
          * @returns {Object} data
          */
-        function prepareFormData () {
+        function prepareFormData() {
 
             var data = {},
                 matches,
@@ -502,7 +514,7 @@
                 var tmpObject = {},
                     tmpArray = [];
 
-                for (var k = matches.length - 1; k >= 0 ; k--) {
+                for (var k = matches.length - 1; k >= 0; k--) {
                     if (matches[k] === "") {
                         matches.splice(k, 1);
                         continue;
@@ -534,9 +546,10 @@
          *
          * @returns {Boolean} true if no error(s) were found (valid input)
          */
-        function validateInput(input) {
+        function validateInput(input, value) {
 
-            var inputName = $(input).attr('name');
+            var inputName = $(input).attr('name'),
+                value = value || _getInputValue(input);
 
             if (!inputName) {
 
@@ -552,9 +565,7 @@
                 return false;
             }
 
-            var value = _getInputValue(input),
-
-                matches = inputName.replace(/]$/, '').split(/]\[|[[\]]/g),
+            var matches = inputName.replace(/]$/, '').split(/]\[|[[\]]/g),
                 inputShortName = window.Validation.labels[inputName] ||
                     options.labels[inputName] ||
                     $(input).attr(_data.label) ||
@@ -567,8 +578,6 @@
                 validationRegexMessage = $(input).attr(_data.regexMessage),
 
                 validateOnce = false;
-
-            formData[inputName] = value;
 
             if (validationArray) {
                 validationArray = _api._splitValidation(validationArray);
@@ -883,7 +892,7 @@
 
             if (options.submit.settings.display === "inline" ||
                 (options.submit.settings.display === "block" && !errorContainer.find('[' + _data.errorList + ']')[0])
-            ) {
+                ) {
                 if (options.submit.settings.insertion === 'append') {
                     errorContainer.append(html);
                 } else if (options.submit.settings.insertion === 'prepend') {
@@ -892,7 +901,7 @@
             }
 
             for (var i = 0; i < errors[inputName].length; i++) {
-                errorContainer.find('ul').append('<li>' + errors[inputName][i] + '</li>');
+                errorContainer.find('[' + _data.errorList + '] ul').append('<li>' + errors[inputName][i] + '</li>');
             }
 
             if (options.submit.settings.clear || options.dynamic.settings.trigger) {
@@ -1460,7 +1469,7 @@
                     // {debug}
                     window.Debug.log({
                         'function': '$.validate()',
-                        'arguments': JSON.stringify(options.submit.settings.form),
+                        'arguments': options.submit.settings.form,
                         'message': 'Unable to find jQuery form element - Validation dropped'
                     });
 
@@ -1636,7 +1645,7 @@
                 window.Debug.log({
                     'node': node,
                     'function': '$.addError()',
-                    'arguments': 'window.Validation.form[' + JSON.stringify(node.selector) + ']',
+                    'arguments': 'window.Validation.form[' + node.selector + ']',
                     'message': 'ERROR - Invalid node selector'
                 });
 
@@ -1652,7 +1661,7 @@
                 window.Debug.log({
                     'node': node,
                     'function': '$.addError()',
-                    'arguments': 'window.Validation.form[' + JSON.stringify(node.selector) + ']',
+                    'arguments': 'window.Validation.form[' + node.selector + ']',
                     'message': 'ERROR - Invalid argument, must be type object'
                 });
 
@@ -1681,7 +1690,7 @@
                     window.Debug.log({
                         'node': node,
                         'function': '$.addError()',
-                        'arguments': JSON.stringify(inputName),
+                        'arguments': inputName,
                         'message': 'ERROR - Unable to find ' + '$(' + node.selector + ').find("[name="' + inputName + '"]")'
                     });
 
@@ -1706,7 +1715,7 @@
                         window.Debug.log({
                             'node': node,
                             'function': '$.addError()',
-                            'arguments': JSON.stringify(error[inputName][i]),
+                            'arguments': error[inputName][i],
                             'message': 'ERROR - Invalid error object property - Accepted format: {"inputName": "errorString"} or {"inputName": ["errorString", "errorString"]}'
                         });
 
@@ -1749,7 +1758,7 @@
                 window.Debug.log({
                     'node': node,
                     'function': '$.removeError()',
-                    'arguments': 'window.Validation.form[' + JSON.stringify(node.selector) + ']',
+                    'arguments': 'window.Validation.form[' + node.selector + ']',
                     'message': 'ERROR - Invalid node selector'
                 });
 
@@ -1770,7 +1779,7 @@
                 window.Debug.log({
                     'node': node,
                     'function': '$.removeError()',
-                    'arguments': JSON.stringify(inputName),
+                    'arguments': inputName,
                     'message': 'ERROR - Invalid inputName, must be type String or Array'
                 });
 
@@ -1794,7 +1803,7 @@
                     window.Debug.log({
                         'node': node,
                         'function': '$.removeError()',
-                        'arguments': JSON.stringify(inputName[i]),
+                        'arguments': inputName[i],
                         'message': 'ERROR - Unable to find ' + '$(' + node.selector + ').find("[name="' + inputName[i] + '"]")'
                     });
 

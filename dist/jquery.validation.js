@@ -4,7 +4,7 @@
  * Licensed under the MIT license
  *
  * @author Tom Bertrand
- * @version 2.0.0 (2015-04-22)
+ * @version 1.5.3 (2015-06-14)
  * @link http://www.runningcoder.org/jqueryvalidation/
  */
 ;
@@ -22,117 +22,117 @@
         };
     }
     var _rules = {
-            NOTEMPTY: /\S/,
-            INTEGER: /^\d+$/,
-            NUMERIC: /^\d+(?:[,\s]\d{3})*(?:\.\d+)?$/,
-            MIXED: /^[\w\s-]+$/,
-            NAME: /^['a-zãàáäâẽèéëêìíïîõòóöôùúüûñç\s-]+$/i,
-            NOSPACE: /^(?!\s)\S*$/,
-            TRIM: /^[^\s].*[^\s]$/,
-            DATE: /^\d{4}-\d{2}-\d{2}(\s\d{2}:\d{2}(:\d{2})?)?$/,
-            EMAIL: /^([^@]+?)@(([a-z0-9]-*)*[a-z0-9]+\.)+([a-z0-9]+)$/i,
-            URL: /^(https?:\/\/)?((([a-z0-9]-*)*[a-z0-9]+\.?)*([a-z0-9]+))(\/[\w?=\.-]*)*$/,
-            PHONE: /^(\()?\d{3}(\))?(-|\s)?\d{3}(-|\s)\d{4}$/,
-            OPTIONAL: /\S/,
-            COMPARISON: /^\s*([LV])\s*([<>]=?|==|!=)\s*([^<>=!]+?)\s*$/
-        },
+        NOTEMPTY: /\S/,
+        INTEGER: /^\d+$/,
+        NUMERIC: /^\d+(?:[,\s]\d{3})*(?:\.\d+)?$/,
+        MIXED: /^[\w\s-]+$/,
+        NAME: /^['a-zãàáäâẽèéëêìíïîõòóöôùúüûñç\s-]+$/i,
+        NOSPACE: /^(?!\s)\S*$/,
+        TRIM: /^[^\s].*[^\s]$/,
+        DATE: /^\d{4}-\d{2}-\d{2}(\s\d{2}:\d{2}(:\d{2})?)?$/,
+        EMAIL: /^([^@]+?)@(([a-z0-9]-*)*[a-z0-9]+\.)+([a-z0-9]+)$/i,
+        URL: /^(https?:\/\/)?((([a-z0-9]-*)*[a-z0-9]+\.?)*([a-z0-9]+))(\/[\w?=\.-]*)*$/,
+        PHONE: /^(\()?\d{3}(\))?(-|\s)?\d{3}(-|\s)\d{4}$/,
+        OPTIONAL: /\S/,
+        COMPARISON: /^\s*([LV])\s*([<>]=?|==|!=)\s*([^<>=!]+?)\s*$/
+    };
 
-        _messages = {
-            'default': '$ contain error(s).',
-            'NOTEMPTY': '$ must not be empty.',
-            'INTEGER': '$ must be an integer.',
-            'NUMERIC': '$ must be numeric.',
-            'MIXED': '$ must be letters or numbers (no special characters).',
-            'NAME': '$ must not contain special characters.',
-            'NOSPACE': '$ must not contain spaces.',
-            'TRIM': '$ must not start or end with space character.',
-            'DATE': '$ is not a valid with format YYYY-MM-DD.',
-            'EMAIL': '$ is not valid.',
-            'URL': '$ is not valid.',
-            'PHONE': '$ is not a valid phone number.',
-            '<': '$ must be less than % characters.',
-            '<=': '$ must be less or equal to % characters.',
-            '>': '$ must be greater than % characters.',
-            '>=': '$ must be greater or equal to % characters.',
-            '==': '$ must be equal to %',
-            '!=': '$ must be different than %'
-        },
+    var _messages = {
+        'default': '$ contain error(s).',
+        'NOTEMPTY': '$ must not be empty.',
+        'INTEGER': '$ must be an integer.',
+        'NUMERIC': '$ must be numeric.',
+        'MIXED': '$ must be letters or numbers (no special characters).',
+        'NAME': '$ must not contain special characters.',
+        'NOSPACE': '$ must not contain spaces.',
+        'TRIM': '$ must not start or end with space character.',
+        'DATE': '$ is not a valid with format YYYY-MM-DD.',
+        'EMAIL': '$ is not valid.',
+        'URL': '$ is not valid.',
+        'PHONE': '$ is not a valid phone number.',
+        '<': '$ must be less than % characters.',
+        '<=': '$ must be less or equal to % characters.',
+        '>': '$ must be greater than % characters.',
+        '>=': '$ must be greater or equal to % characters.',
+        '==': '$ must be equal to %',
+        '!=': '$ must be different than %'
+    };
 
-        _data = {
-            validation: 'data-validation',
-            validationMessage: 'data-validation-message',
-            regex: 'data-validation-regex',
-            regexReverse: 'data-validation-regex-reverse',
-            regexMessage: 'data-validation-regex-message',
-            group: 'data-validation-group',
-            label: 'data-validation-label',
-            errorList: 'data-error-list'
-        },
+    var _data = {
+        validation: 'data-validation',
+        validationMessage: 'data-validation-message',
+        regex: 'data-validation-regex',
+        regexReverse: 'data-validation-regex-reverse',
+        regexMessage: 'data-validation-regex-message',
+        group: 'data-validation-group',
+        label: 'data-validation-label',
+        errorList: 'data-error-list'
+    }
 
-        _options = {
-            submit: {
-                settings: {
-                    form: null,
-                    display: "inline",
-                    insertion: "append",
-                    allErrors: false,
-                    trigger: "click",
-                    button: "[type='submit']",
-                    errorClass: "error",
-                    errorListClass: "error-list",
-                    errorListContainer: null,
-                    inputContainer: null,
-                    clear: "focusin",
-                    scrollToError: false
-                },
-                callback: {
-                    onInit: null,
-                    onValidate: null,
-                    onError: null,
-                    onBeforeSubmit: null,
-                    onSubmit: null,
-                    onAfterSubmit: null
-                }
+    var _options = {
+        submit: {
+            settings: {
+                form: null,
+                display: "inline",
+                insertion: "append",
+                allErrors: false,
+                trigger: "click",
+                button: "[type='submit']",
+                errorClass: "error",
+                errorListClass: "error-list",
+                errorListContainer: null,
+                inputContainer: null,
+                clear: "focusin",
+                scrollToError: false
             },
-            dynamic: {
-                settings: {
-                    trigger: null,
-                    delay: 300
-                },
-                callback: {
-                    onSuccess: null,
-                    onError: null,
-                    onComplete: null
-                }
-            },
-            rules: {},
-            messages: {},
-            labels: {},
-            debug: false
+            callback: {
+                onInit: null,
+                onValidate: null,
+                onError: null,
+                onBeforeSubmit: null,
+                onSubmit: null,
+                onAfterSubmit: null
+            }
         },
+        dynamic: {
+            settings: {
+                trigger: null,
+                delay: 300
+            },
+            callback: {
+                onSuccess: null,
+                onError: null,
+                onComplete: null
+            }
+        },
+        rules: {},
+        messages: {},
+        labels: {},
+        debug: false
+    };
 
-        _supported = {
-            submit: {
-                settings: {
-                    display: ["inline", "block"],
-                    insertion: ["append", "prepend"], //"before", "insertBefore", "after", "insertAfter"
-                    allErrors: [true, false],
-                    clear: ["focusin", "keypress", false],
-                    trigger: [
-                        "click", "dblclick", "focusout",
-                        "hover", "mousedown", "mouseenter",
-                        "mouseleave", "mousemove", "mouseout",
-                        "mouseover", "mouseup", "toggle"
-                    ]
-                }
-            },
-            dynamic: {
-                settings: {
-                    trigger: ["focusout", "keydown", "keypress", "keyup"]
-                }
-            },
-            debug: [true, false]
-        };
+    var _supported = {
+        submit: {
+            settings: {
+                display: ["inline", "block"],
+                insertion: ["append", "prepend"], //"before", "insertBefore", "after", "insertAfter"
+                allErrors: [true, false],
+                clear: ["focusin", "keypress", false],
+                trigger: [
+                    "click", "dblclick", "focusout",
+                    "hover", "mousedown", "mouseenter",
+                    "mouseleave", "mousemove", "mouseout",
+                    "mouseover", "mouseup", "toggle"
+                ]
+            }
+        },
+        dynamic: {
+            settings: {
+                trigger: ["focusout", "keydown", "keypress", "keyup"]
+            }
+        },
+        debug: [true, false]
+    };
 
     var Validation = function(node, options) {
 
@@ -252,7 +252,6 @@
             options.debug && window.Debug.log({
                 'node': node,
                 'function': 'delegateDynamicValidation()',
-                'arguments': JSON.stringify(options),
                 'message': 'OK - Dynamic Validation activated on ' + node.length + ' form(s)'
             });
 
@@ -315,7 +314,6 @@
             options.debug && window.Debug.log({
                 'node': node,
                 'function': 'delegateValidation()',
-                'arguments': JSON.stringify(options),
                 'message': 'OK - Validation activated on ' + node.length + ' form(s)'
             });
 
@@ -368,11 +366,24 @@
 
             formData = {};
 
+
             $.each(
-                node.find('[' + _data.validation + ']:not([disabled]),[' + _data.regex + ']:not([disabled])'),
+                node.find('input:not([type="submit"]), select, textarea'),
                 function(index, input) {
-                    if (!validateInput(input)) {
-                        isValid = false;
+
+                    input = $(input);
+
+                    var value = _getInputValue(input[0]),
+                        inputName = input.attr('name');
+
+                    if (inputName) {
+                        formData[inputName] = value;
+                    }
+
+                    if (!input.attr('disabled') && (!!input.attr(_data.validation) || !!input.attr(_data.regex))) {
+                        if (!validateInput(input[0], value)) {
+                            isValid = false;
+                        }
                     }
                 }
             );
@@ -422,9 +433,10 @@
 
         }
 
-        function validateInput(input) {
+        function validateInput(input, value) {
 
-            var inputName = $(input).attr('name');
+            var inputName = $(input).attr('name'),
+                value = value || _getInputValue(input);
 
             if (!inputName) {
                 options.debug && window.Debug.log({
@@ -437,9 +449,7 @@
                 return false;
             }
 
-            var value = _getInputValue(input),
-
-                matches = inputName.replace(/]$/, '').split(/]\[|[[\]]/g),
+            var matches = inputName.replace(/]$/, '').split(/]\[|[[\]]/g),
                 inputShortName = window.Validation.labels[inputName] ||
                 options.labels[inputName] ||
                 $(input).attr(_data.label) ||
@@ -452,8 +462,6 @@
                 validationRegexMessage = $(input).attr(_data.regexMessage),
 
                 validateOnce = false;
-
-            formData[inputName] = value;
 
             if (validationArray) {
                 validationArray = _api._splitValidation(validationArray);
@@ -715,7 +723,7 @@
             }
 
             for (var i = 0; i < errors[inputName].length; i++) {
-                errorContainer.find('ul').append('<li>' + errors[inputName][i] + '</li>');
+                errorContainer.find('[' + _data.errorList + '] ul').append('<li>' + errors[inputName][i] + '</li>');
             }
 
             if (options.submit.settings.clear || options.dynamic.settings.trigger) {
@@ -1056,7 +1064,7 @@
                 if (!node[0] || node[0].nodeName.toLowerCase() !== "form") {
                     window.Debug.log({
                         'function': '$.validate()',
-                        'arguments': JSON.stringify(options.submit.settings.form),
+                        'arguments': options.submit.settings.form,
                         'message': 'Unable to find jQuery form element - Validation dropped'
                     });
 
@@ -1187,7 +1195,7 @@
                 window.Debug.log({
                     'node': node,
                     'function': '$.addError()',
-                    'arguments': 'window.Validation.form[' + JSON.stringify(node.selector) + ']',
+                    'arguments': 'window.Validation.form[' + node.selector + ']',
                     'message': 'ERROR - Invalid node selector'
                 });
 
@@ -1200,7 +1208,7 @@
                 window.Debug.log({
                     'node': node,
                     'function': '$.addError()',
-                    'arguments': 'window.Validation.form[' + JSON.stringify(node.selector) + ']',
+                    'arguments': 'window.Validation.form[' + node.selector + ']',
                     'message': 'ERROR - Invalid argument, must be type object'
                 });
 
@@ -1226,7 +1234,7 @@
                     window.Debug.log({
                         'node': node,
                         'function': '$.addError()',
-                        'arguments': JSON.stringify(inputName),
+                        'arguments': inputName,
                         'message': 'ERROR - Unable to find ' + '$(' + node.selector + ').find("[name="' + inputName + '"]")'
                     });
 
@@ -1248,7 +1256,7 @@
                         window.Debug.log({
                             'node': node,
                             'function': '$.addError()',
-                            'arguments': JSON.stringify(error[inputName][i]),
+                            'arguments': error[inputName][i],
                             'message': 'ERROR - Invalid error object property - Accepted format: {"inputName": "errorString"} or {"inputName": ["errorString", "errorString"]}'
                         });
 
@@ -1273,7 +1281,7 @@
                 window.Debug.log({
                     'node': node,
                     'function': '$.removeError()',
-                    'arguments': 'window.Validation.form[' + JSON.stringify(node.selector) + ']',
+                    'arguments': 'window.Validation.form[' + node.selector + ']',
                     'message': 'ERROR - Invalid node selector'
                 });
 
@@ -1291,7 +1299,7 @@
                 window.Debug.log({
                     'node': node,
                     'function': '$.removeError()',
-                    'arguments': JSON.stringify(inputName),
+                    'arguments': inputName,
                     'message': 'ERROR - Invalid inputName, must be type String or Array'
                 });
 
@@ -1312,7 +1320,7 @@
                     window.Debug.log({
                         'node': node,
                         'function': '$.removeError()',
-                        'arguments': JSON.stringify(inputName[i]),
+                        'arguments': inputName[i],
                         'message': 'ERROR - Unable to find ' + '$(' + node.selector + ').find("[name="' + inputName[i] + '"]")'
                     });
 

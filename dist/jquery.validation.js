@@ -4,7 +4,7 @@
  * Licensed under the MIT license
  *
  * @author Tom Bertrand
- * @version 1.5.3 (2015-06-14)
+ * @version 1.5.3 (2015-07-02)
  * @link http://www.runningcoder.org/jqueryvalidation/
  */
 ;
@@ -368,7 +368,7 @@
 
 
             $.each(
-                node.find('input:not([type="submit"]), select, textarea'),
+                node.find('input:not([type="submit"]), select, textarea').not(':disabled'),
                 function(index, input) {
 
                     input = $(input);
@@ -380,7 +380,7 @@
                         formData[inputName] = value;
                     }
 
-                    if (!input.attr('disabled') && (!!input.attr(_data.validation) || !!input.attr(_data.regex))) {
+                    if (!!input.attr(_data.validation) || !!input.attr(_data.regex)) {
                         if (!validateInput(input[0], value)) {
                             isValid = false;
                         }

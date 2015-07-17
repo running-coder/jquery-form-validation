@@ -4,7 +4,7 @@
  * Licensed under the MIT license
  *
  * @author Tom Bertrand
- * @version 1.5.3 (2015-07-08)
+ * @version 1.5.3 (2015-07-16)
  * @link http://www.runningcoder.org/jqueryvalidation/
 */
 ;
@@ -462,7 +462,7 @@
          */
         function validateForm() {
 
-            var isValid = true;
+            var isValid = isEmpty(errors);
 
             formData = {};
 
@@ -1972,7 +1972,7 @@
         },
         print: function () {
 
-            if ($.isEmptyObject(this.table)) {
+            if (isEmpty(this.table)) {
                 return false;
             }
 
@@ -2004,6 +2004,15 @@
     String.prototype.capitalize = function () {
         return this.charAt(0).toUpperCase() + this.slice(1);
     };
+
+    function isEmpty (obj) {
+        for (var prop in obj) {
+            if (obj.hasOwnProperty(prop))
+                return false;
+        }
+
+        return true;
+    }
 
     if (!Array.prototype.indexOf) {
         Array.prototype.indexOf = function (elt /*, from*/) {

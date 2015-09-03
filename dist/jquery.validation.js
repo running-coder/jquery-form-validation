@@ -4,7 +4,7 @@
  * Licensed under the MIT license
  *
  * @author Tom Bertrand
- * @version 1.5.3 (2015-07-16)
+ * @version 1.5.3 (2015-09-03)
  * @link http://www.runningcoder.org/jqueryvalidation/
  */
 ;
@@ -81,6 +81,7 @@
                 errorClass: "error",
                 errorListClass: "error-list",
                 errorListContainer: null,
+                errorTemplate: null,
                 inputContainer: null,
                 clear: "focusin",
                 scrollToError: false
@@ -730,7 +731,12 @@
             }
 
             for (var i = 0; i < errors[inputName].length; i++) {
-                errorContainer.find('[' + _data.errorList + '] ul').append('<li>' + errors[inputName][i] + '</li>');
+                if (options.submit.settings.errorTemplate) {
+                    errorContainer.find('[' + _data.errorList + '] ul')
+                        .append('<li>' + options.submit.settings.errorTemplate.replace('{{validation-message}}', errors[inputName][i]) + '</li>');
+                } else {
+                    errorContainer.find('[' + _data.errorList + '] ul').append('<li>' + errors[inputName][i] + '</li>');
+                }
             }
 
             if (options.submit.settings.clear || options.dynamic.settings.trigger) {

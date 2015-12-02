@@ -4,7 +4,7 @@
  * Licensed under the MIT license
  *
  * @author Tom Bertrand
- * @version 1.5.3 (2015-09-03)
+ * @version 1.5.3 (2015-12-02)
  * @link http://www.runningcoder.org/jqueryvalidation/
 */
 ;
@@ -439,7 +439,13 @@
 
                     _executeCallback(options.submit.callback.onBeforeSubmit, [node]);
 
-                    (options.submit.callback.onSubmit) ? _executeCallback(options.submit.callback.onSubmit, [node, formData]) : submitForm();
+                    if (typeof options.submit.callback.onSubmit === "function") {
+                        if (_executeCallback(options.submit.callback.onSubmit, [node, formData]) === true) {
+                            submitForm();
+                        }
+                    } else {
+                        submitForm();
+                    }
 
                     _executeCallback(options.submit.callback.onAfterSubmit, [node]);
 
@@ -1196,8 +1202,7 @@
 
             }
 
-            _callback.apply(this, $.merge(_params || [], (extraParams) ? extraParams : []));
-            return true;
+            return _callback.apply(this, $.merge(_params || [], (extraParams) ? extraParams : []));
 
         };
 

@@ -1814,7 +1814,7 @@
             var input;
             for (var i = 0; i < inputName.length; i++) {
 
-                input = $(node.selector).find('[name="' + inputName[i] + '"]');
+                input = node.find('[name="' + inputName[i] + '"]');
                 if (!input[0]) {
 
                     // {debug}
